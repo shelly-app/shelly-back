@@ -1,0 +1,58 @@
+{
+  "name": "shelly-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "type": "module",
+  "imports": {
+    "#/*": "./dist/*"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch --env-file=.env src/api/server.ts",
+    "start": "node --env-file=.env dist/api/server.js",
+    "check": "biome check --write",
+    "test": "vitest run",
+    "prepare": "husky",
+    "db:generate": "cross-env NODE_OPTIONS='--import tsx' drizzle-kit generate",
+    "db:migrate": "cross-env DB_MIGRATING=true tsx --env-file=.env src/db/migrate.ts",
+    "db:seed": "cross-env DB_SEEDING=true tsx --env-file=.env src/db/seed.ts",
+    "db:studio": "cross-env NODE_OPTIONS='--import tsx' drizzle-kit studio",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down"
+  },
+  "lint-staged": {
+    "*.{ts,json}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@scalar/express-api-reference": "0.8.28",
+    "aws-jwt-verify": "5.1.1",
+    "cors": "2.8.6",
+    "drizzle-orm": "0.45.1",
+    "drizzle-zod": "0.8.3",
+    "express": "5.2.1",
+    "pg": "8.16.3",
+    "zod": "4.1.13",
+    "zod-openapi": "5.4.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.8",
+    "@types/cors": "2.8.19",
+    "@types/express": "5.0.6",
+    "@types/node": "25.0.1",
+    "@types/pg": "8.16.0",
+    "cross-env": "10.1.0",
+    "dotenv": "17.2.3",
+    "drizzle-kit": "0.31.8",
+    "husky": "9.1.7",
+    "lint-staged": "16.2.7",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3",
+    "vitest": "4.0.15"
+  }
+}

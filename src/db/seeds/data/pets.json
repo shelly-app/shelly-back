@@ -1,0 +1,167 @@
+[
+  {
+    "name": "Firulais",
+    "birthDate": "2021-03-15",
+    "breed": "Labrador",
+    "specie": "dog",
+    "sex": "male",
+    "size": "large",
+    "status": "in_shelter",
+    "description": "Friendly and energetic Labrador looking for a loving home.",
+    "shelter": "APAC",
+    "colors": ["golden", "white"],
+    "vaccinations": [
+      { "vaccineCode": "RAB", "administeredAt": "2023-05-15" },
+      { "vaccineCode": "DHPP", "administeredAt": "2023-05-15" }
+    ],
+    "statusHistory": [
+      { "status": "in_foster", "changedAt": "2021-04-10T10:00:00Z" },
+      { "status": "in_shelter", "changedAt": "2021-12-01T14:30:00Z" }
+    ],
+    "events": [
+      {
+        "name": "Ingreso al refugio",
+        "description": "Encontrado deambulando solo cerca del parque central. Sin collar ni chip.",
+        "createdAt": "2021-12-01T10:00:00Z"
+      },
+      {
+        "name": "Revisión veterinaria",
+        "description": "Control general. Buen estado de salud. Se recomienda dieta balanceada.",
+        "createdAt": "2021-12-05T09:30:00Z"
+      },
+      {
+        "name": "Campaña de adopción",
+        "description": "Participó en la feria de adopción del barrio. Muy buena recepción del público.",
+        "createdAt": "2022-04-23T11:00:00Z"
+      },
+      {
+        "name": "Castración",
+        "description": "Procedimiento realizado sin complicaciones. Recuperación en 48 hs.",
+        "createdAt": "2022-07-18T08:00:00Z"
+      },
+      {
+        "name": "Desparasitación",
+        "description": "Tratamiento antiparasitario interno y externo aplicado.",
+        "createdAt": "2023-03-10T10:15:00Z"
+      }
+    ]
+  },
+  {
+    "name": "Luna",
+    "birthDate": "2022-07-10",
+    "breed": "Siamese",
+    "specie": "cat",
+    "sex": "female",
+    "size": "small",
+    "status": "in_shelter",
+    "description": "Calm and affectionate Siamese cat.",
+    "shelter": "APAC",
+    "colors": ["white", "black"],
+    "vaccinations": [
+      { "vaccineCode": "FVRCP", "administeredAt": "2022-09-01" },
+      { "vaccineCode": "FeLV", "administeredAt": "2022-10-01" }
+    ],
+    "statusHistory": [
+      { "status": "in_shelter", "changedAt": "2022-08-01T09:15:00Z" }
+    ],
+    "events": [
+      {
+        "name": "Ingreso al refugio",
+        "description": "Rescatada de la vía pública junto a su camada. Los otros gatitos fueron adoptados.",
+        "createdAt": "2022-08-01T09:15:00Z"
+      },
+      {
+        "name": "Primer control veterinario",
+        "description": "Estado general bueno. Se inició plan de vacunación.",
+        "createdAt": "2022-08-10T10:00:00Z"
+      },
+      {
+        "name": "Esterilización",
+        "description": "Operación exitosa. Alta médica al día siguiente.",
+        "createdAt": "2023-01-20T08:30:00Z"
+      },
+      {
+        "name": "Solicitud de adopción recibida",
+        "description": "Una familia presentó solicitud de adopción. En evaluación.",
+        "createdAt": "2023-11-05T14:00:00Z"
+      },
+      {
+        "name": "Solicitud de adopción rechazada",
+        "description": "La familia no cumplió los requisitos de espacio mínimo para la raza.",
+        "createdAt": "2023-11-12T16:30:00Z"
+      }
+    ]
+  },
+  {
+    "name": "Rocky",
+    "birthDate": "2020-11-20",
+    "breed": "Beagle",
+    "specie": "dog",
+    "sex": "male",
+    "size": "medium",
+    "status": "adopted",
+    "description": "Playful Beagle who loves outdoor adventures.",
+    "shelter": "Corazones Vagabundos",
+    "colors": ["brown", "white", "black"],
+    "vaccinations": [{ "vaccineCode": "BORD", "administeredAt": "2021-01-10" }],
+    "statusHistory": [
+      { "status": "in_shelter", "changedAt": "2020-12-05T11:00:00Z" },
+      { "status": "adopted", "changedAt": "2021-02-14T16:45:00Z" }
+    ],
+    "events": [
+      {
+        "name": "Ingreso al refugio",
+        "description": "Entregado por su dueño anterior quien no podía seguir cuidándolo.",
+        "createdAt": "2020-12-05T11:00:00Z"
+      },
+      {
+        "name": "Revisión médica inicial",
+        "description": "Leve desnutrición. Se inició dieta de recuperación.",
+        "createdAt": "2020-12-07T09:00:00Z"
+      },
+      {
+        "name": "Adoptado",
+        "description": "Adoptado por la familia González. Feliz día de San Valentín, Rocky.",
+        "createdAt": "2021-02-14T16:45:00Z"
+      }
+    ]
+  },
+  {
+    "name": "Mia",
+    "birthDate": "2023-01-05",
+    "breed": "Domestic Shorthair",
+    "specie": "cat",
+    "sex": "female",
+    "size": "small",
+    "status": "in_shelter",
+    "description": "Sweet kitten looking for a quiet home.",
+    "shelter": "Corazones Vagabundos",
+    "colors": ["black", "white"],
+    "vaccinations": [],
+    "statusHistory": [
+      { "status": "in_shelter", "changedAt": "2023-02-10T13:20:00Z" }
+    ],
+    "events": [
+      {
+        "name": "Ingreso al refugio",
+        "description": "Encontrada recién nacida en una caja frente al refugio.",
+        "createdAt": "2023-02-10T13:20:00Z"
+      },
+      {
+        "name": "Atención neonatal",
+        "description": "Crianza con biberón las primeras 4 semanas. Evolución excelente.",
+        "createdAt": "2023-02-11T08:00:00Z"
+      },
+      {
+        "name": "Primera visita veterinaria",
+        "description": "Peso y desarrollo normales para su edad. Lista para iniciar vacunación próximo mes.",
+        "createdAt": "2023-03-15T10:30:00Z"
+      },
+      {
+        "name": "Sesión fotográfica para adopción",
+        "description": "Fotos publicadas en redes sociales del refugio. Alto engagement.",
+        "createdAt": "2023-09-02T12:00:00Z"
+      }
+    ]
+  }
+]
