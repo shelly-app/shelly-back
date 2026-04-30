@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm";
 import { pgTable, serial, varchar } from "drizzle-orm/pg-core";
-import { timestamps } from "#/db/schema/helpers/timestamps.js";
-import { rolePermissions } from "#/db/schema/role-permissions.js";
-import { shelterMembers } from "#/db/schema/shelter-members.js";
+import { timestamps } from "@/db/schema/helpers/timestamps";
+import { rolePermissions } from "@/db/schema/role-permissions";
+import { shelterMembers } from "@/db/schema/shelter-members";
 
 export const roles = pgTable("roles", {
   id: serial("id").primaryKey(),

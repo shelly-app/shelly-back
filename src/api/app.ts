@@ -1,10 +1,10 @@
 import cors from "cors";
 import express from "express";
-import { handleError } from "#/api/error-handler.js";
-import { openApiRouter } from "#/api/openapi.js";
-import { petsRouter } from "#/api/pets/routes.js";
-import { sheltersRouter } from "#/api/shelters/routes.js";
-import { usersRouter } from "#/api/users/routes.js";
+import { handleError } from "@/api/error-handler";
+import { openApiRouter } from "@/api/openapi";
+import { petsRouter } from "@/api/pets/routes";
+import { sheltersRouter } from "@/api/shelters/routes";
+import { usersRouter } from "@/api/users/routes";
 
 export const app = express();
 

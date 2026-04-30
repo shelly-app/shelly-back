@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { petInsertSchema } from "#/api/pets/schemas.js";
+import { petInsertSchema } from "@/api/pets/schemas";
 
 export const shelterPetParamsSchema = z.object({
   shelterId: z.coerce.number().int().positive(),

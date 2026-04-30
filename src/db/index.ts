@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
-import * as schema from "#/db/schema/index.js";
+import * as schema from "@/db/schema";
 import {
   dbHost,
   dbMigrating,
@@ -9,7 +9,7 @@ import {
   dbPort,
   dbSeeding,
   dbUser,
-} from "#/env.js";
+} from "@/env";
 
 export const connection = new pg.Pool({
   user: dbUser,

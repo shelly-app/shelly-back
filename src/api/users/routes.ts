@@ -1,15 +1,15 @@
 import { Router } from "express";
 import type { ZodOpenApiPathsObject } from "zod-openapi";
-import { StatusCodes } from "#/api/constants.js";
-import { authMiddleware } from "#/api/middleware/auth.js";
-import { getMe, getUser, updateUser } from "#/api/users/handlers.js";
+import { StatusCodes } from "@/api/constants";
+import { authMiddleware } from "@/api/middleware/auth";
+import { getMe, getUser, updateUser } from "@/api/users/handlers";
 import {
   meResponseSchema,
   updateUserBodySchema,
   updateUserResponseSchema,
   userIdParamsSchema,
   userResponseSchema,
-} from "#/api/users/schemas.js";
+} from "@/api/users/schemas";
 
 export const usersRouter = Router();
 

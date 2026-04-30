@@ -2,10 +2,10 @@ import { CognitoJwtVerifier } from "aws-jwt-verify";
 import { eq } from "drizzle-orm";
 import type { NextFunction, Request, Response } from "express";
 import { z } from "zod";
-import { StatusCodes } from "#/api/constants.js";
-import { db } from "#/db/index.js";
-import { users } from "#/db/schema/index.js";
-import { cognitoClientId, cognitoUserPoolId } from "#/env.js";
+import { StatusCodes } from "@/api/constants";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { cognitoClientId, cognitoUserPoolId } from "@/env";
 
 const verifier = CognitoJwtVerifier.create({
   userPoolId: cognitoUserPoolId,

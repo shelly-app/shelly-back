@@ -9,14 +9,14 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { events } from "#/db/schema/events.js";
-import { petColors } from "#/db/schema/pet-colors.js";
-import { petStatus } from "#/db/schema/pet-status.js";
-import { petStatusHistory } from "#/db/schema/pet-status-history.js";
-import { shelter } from "#/db/schema/shelter.js";
-import { species } from "#/db/schema/species.js";
-import { vaccinations } from "#/db/schema/vaccinations.js";
-import { timestamps } from "./helpers/timestamps.js";
+import { events } from "@/db/schema/events";
+import { petColors } from "@/db/schema/pet-colors";
+import { petStatus } from "@/db/schema/pet-status";
+import { petStatusHistory } from "@/db/schema/pet-status-history";
+import { shelter } from "@/db/schema/shelter";
+import { species } from "@/db/schema/species";
+import { vaccinations } from "@/db/schema/vaccinations";
+import { timestamps } from "./helpers/timestamps";
 
 export const sexEnum = pgEnum("sex", ["male", "female"]);
 export const sizeEnum = pgEnum("size", ["small", "medium", "large"]);

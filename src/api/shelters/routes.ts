@@ -1,26 +1,26 @@
 import { Router } from "express";
 import { z } from "zod";
 import type { ZodOpenApiPathsObject } from "zod-openapi";
-import { StatusCodes } from "#/api/constants.js";
-import { authMiddleware } from "#/api/middleware/auth.js";
-import { detailedPetResponseSchema } from "#/api/pets/schemas.js";
+import { StatusCodes } from "@/api/constants";
+import { authMiddleware } from "@/api/middleware/auth";
+import { detailedPetResponseSchema } from "@/api/pets/schemas";
 import {
   getAllShelters,
   getShelter,
   getShelterPets,
-} from "#/api/shelters/handlers.js";
+} from "@/api/shelters/handlers";
 import {
   shelterMembersPaths,
   shelterMembersRouter,
-} from "#/api/shelters/members/routes.js";
+} from "@/api/shelters/members/routes";
 import {
   shelterPetsPaths,
   shelterPetsRouter,
-} from "#/api/shelters/pets/routes.js";
+} from "@/api/shelters/pets/routes";
 import {
   shelterIdParamsSchema,
   shelterSelectSchema,
-} from "#/api/shelters/schemas.js";
+} from "@/api/shelters/schemas";
 
 export const sheltersRouter = Router();
 

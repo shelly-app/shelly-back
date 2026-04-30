@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { StatusCodes } from "#/api/constants.js";
+import { StatusCodes } from "@/api/constants";
 import {
   petEventParamsSchema,
   registerEventBodySchema,
@@ -8,7 +8,7 @@ import {
   shelterIdParamsSchema,
   shelterPetParamsSchema,
   updatePetBodySchema,
-} from "#/api/shelters/pets/schemas.js";
+} from "@/api/shelters/pets/schemas";
 import {
   deleteEvent,
   deletePet,
@@ -17,7 +17,7 @@ import {
   registerPet,
   registerVaccination,
   updatePet,
-} from "#/api/shelters/pets/services.js";
+} from "@/api/shelters/pets/services";
 
 export async function handleGetPet(req: Request, res: Response) {
   const { shelterId, petId } = shelterPetParamsSchema.parse(req.params);

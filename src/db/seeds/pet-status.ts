@@ -1,8 +1,6 @@
-import type { db } from "#/db/index.js";
-import { petStatus } from "#/db/schema/index.js";
-import petStatusData from "#/db/seeds/data/pet-status.json" with {
-  type: "json",
-};
+import type { db } from "@/db";
+import { petStatus } from "@/db/schema";
+import petStatusData from "./data/pet-status.json";
 
 export async function seedPetStatus(db: db) {
   await db.insert(petStatus).values(petStatusData);

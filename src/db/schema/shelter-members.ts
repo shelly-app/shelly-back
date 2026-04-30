@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm";
 import { integer, pgTable, primaryKey, timestamp } from "drizzle-orm/pg-core";
-import { roles } from "#/db/schema/roles.js";
-import { shelter } from "#/db/schema/shelter.js";
-import { users } from "#/db/schema/users.js";
+import { roles } from "@/db/schema/roles";
+import { shelter } from "@/db/schema/shelter";
+import { users } from "@/db/schema/users";
 
 export const shelterMembers = pgTable(
   "shelter_members",

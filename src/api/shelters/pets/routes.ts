@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { z } from "zod";
 import type { ZodOpenApiPathsObject } from "zod-openapi";
-import { Permissions, StatusCodes } from "#/api/constants.js";
-import { requirePermission } from "#/api/middleware/require-permission.js";
+import { Permissions, StatusCodes } from "@/api/constants";
+import { requirePermission } from "@/api/middleware/require-permission";
 import {
   detailedPetResponseSchema,
   petResponseSchema,
-} from "#/api/pets/schemas.js";
+} from "@/api/pets/schemas";
 import {
   handleDeleteEvent,
   handleDeletePet,
@@ -15,7 +15,7 @@ import {
   handleRegisterPet,
   handleRegisterVaccination,
   handleUpdatePet,
-} from "#/api/shelters/pets/handlers.js";
+} from "@/api/shelters/pets/handlers";
 import {
   petEventParamsSchema,
   registerEventBodySchema,
@@ -24,7 +24,7 @@ import {
   shelterIdParamsSchema,
   shelterPetParamsSchema,
   updatePetBodySchema,
-} from "#/api/shelters/pets/schemas.js";
+} from "@/api/shelters/pets/schemas";
 
 export const shelterPetsRouter = Router({ mergeParams: true });
 

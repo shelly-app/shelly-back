@@ -1,9 +1,9 @@
 import { apiReference } from "@scalar/express-api-reference";
 import { Router } from "express";
 import { createDocument } from "zod-openapi";
-import { petsPaths } from "#/api/pets/routes.js";
-import { sheltersPaths } from "#/api/shelters/routes.js";
-import { usersPaths } from "#/api/users/routes.js";
+import { petsPaths } from "@/api/pets/routes";
+import { sheltersPaths } from "@/api/shelters/routes";
+import { usersPaths } from "@/api/users/routes";
 
 const openApiDocument = createDocument({
   openapi: "3.1.0",

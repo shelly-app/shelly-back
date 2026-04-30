@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { ZodError } from "zod";
-import { db } from "#/db/index.js";
-import { roles, shelter, shelterMembers, users } from "#/db/schema/index.js";
+import { db } from "@/db";
+import { roles, shelter, shelterMembers, users } from "@/db/schema";
 
 export async function findShelterMembers(shelterId: number) {
   const members = await db.query.shelterMembers.findMany({

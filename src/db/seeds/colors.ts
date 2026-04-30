@@ -1,6 +1,6 @@
-import type { db } from "#/db/index.js";
-import { colors } from "#/db/schema/index.js";
-import colorsData from "#/db/seeds/data/colors.json" with { type: "json" };
+import type { db } from "@/db";
+import { colors } from "@/db/schema";
+import colorsData from "./data/colors.json";
 
 export async function seedColors(db: db) {
   await db.insert(colors).values(colorsData);

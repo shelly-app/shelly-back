@@ -1,8 +1,8 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
-import { hasPermission } from "#/api/middleware/require-permission.js";
-import { db } from "#/db/index.js";
-import { roles, shelterMembers, users } from "#/db/schema/index.js";
+import { hasPermission } from "@/api/middleware/require-permission";
+import { db } from "@/db";
+import { roles, shelterMembers, users } from "@/db/schema";
 
 export async function findUserWithSharedShelters(
   currentUserId: number,

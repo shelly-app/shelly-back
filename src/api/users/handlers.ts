@@ -1,10 +1,7 @@
 import type { Request, Response } from "express";
-import { StatusCodes } from "#/api/constants.js";
-import { hasPermission } from "#/api/middleware/require-permission.js";
-import {
-  updateUserBodySchema,
-  userIdParamsSchema,
-} from "#/api/users/schemas.js";
+import { StatusCodes } from "@/api/constants";
+import { hasPermission } from "@/api/middleware/require-permission";
+import { updateUserBodySchema, userIdParamsSchema } from "@/api/users/schemas";
 import {
   canEditUser,
   findUserById,
@@ -12,7 +9,7 @@ import {
   getAuthenticatedUser,
   updateUserName,
   updateUserShelterRole,
-} from "#/api/users/services.js";
+} from "@/api/users/services";
 
 export async function getMe(req: Request, res: Response) {
   const user = req.user;

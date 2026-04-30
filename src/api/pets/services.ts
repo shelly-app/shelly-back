@@ -1,7 +1,7 @@
 import type { z } from "zod";
-import type { petResponseSchema } from "#/api/pets/schemas.js";
-import { db } from "#/db/index.js";
-import { petStatus } from "#/db/schema/index.js";
+import type { petResponseSchema } from "@/api/pets/schemas";
+import { db } from "@/db";
+import { petStatus } from "@/db/schema";
 
 export async function findAllPublicPets() {
   const pets = await db.query.pet.findMany({

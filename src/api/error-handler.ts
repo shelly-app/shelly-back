@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import { StatusCodes } from "#/api/constants.js";
+import { StatusCodes } from "@/api/constants";
 
 export function handleError(
   err: Error,
