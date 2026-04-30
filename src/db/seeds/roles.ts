@@ -1,6 +1,6 @@
-import type { db } from "#/db/index.js";
-import { roles } from "#/db/schema/index.js";
-import rolesData from "#/db/seeds/data/roles.json" with { type: "json" };
+import type { db } from "@/db";
+import { roles } from "@/db/schema";
+import rolesData from "./data/roles.json";
 
 export async function seedRoles(db: db) {
   await db.insert(roles).values(rolesData);

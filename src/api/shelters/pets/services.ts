@@ -4,12 +4,12 @@ import { ZodError } from "zod";
 import type {
   detailedPetResponseSchema,
   petResponseSchema,
-} from "#/api/pets/schemas.js";
-import { db } from "#/db/index.js";
-import type { Color } from "#/db/schema/colors.js";
-import { events } from "#/db/schema/events.js";
-import { colors, pet, petColors, petStatusHistory } from "#/db/schema/index.js";
-import { vaccinations } from "#/db/schema/vaccinations.js";
+} from "@/api/pets/schemas";
+import { db } from "@/db";
+import { colors, pet, petColors, petStatusHistory } from "@/db/schema";
+import type { Color } from "@/db/schema/colors";
+import { events } from "@/db/schema/events";
+import { vaccinations } from "@/db/schema/vaccinations";
 
 export async function findShelterPetDetailed(shelterId: number, petId: number) {
   const result = await db.query.pet.findFirst({

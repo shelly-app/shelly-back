@@ -1,13 +1,9 @@
 import { and, eq } from "drizzle-orm";
 import type { NextFunction, Request, Response } from "express";
 import { z } from "zod";
-import { type Permissions, StatusCodes } from "#/api/constants.js";
-import { db } from "#/db/index.js";
-import {
-  permissions,
-  rolePermissions,
-  shelterMembers,
-} from "#/db/schema/index.js";
+import { type Permissions, StatusCodes } from "@/api/constants";
+import { db } from "@/db";
+import { permissions, rolePermissions, shelterMembers } from "@/db/schema";
 
 export type PermissionSlug = (typeof Permissions)[keyof typeof Permissions];
 

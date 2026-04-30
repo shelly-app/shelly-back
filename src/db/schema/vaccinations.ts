@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { integer, pgTable, serial, timestamp } from "drizzle-orm/pg-core";
-import { pet } from "#/db/schema/pet.js";
-import { vaccines } from "#/db/schema/vaccines.js";
+import { pet } from "@/db/schema/pet";
+import { vaccines } from "@/db/schema/vaccines";
 
 export const vaccinations = pgTable("vaccinations", {
   id: serial("id").primaryKey(),

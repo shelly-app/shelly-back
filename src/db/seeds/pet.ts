@@ -1,4 +1,4 @@
-import type { db } from "#/db/index.js";
+import type { db } from "@/db";
 import {
   colors,
   events,
@@ -10,25 +10,8 @@ import {
   species,
   vaccinations,
   vaccines,
-} from "#/db/schema/index.js";
-
-const petsData = (
-  await import("#/db/seeds/data/pets.json", { with: { type: "json" } })
-).default as {
-  name: string;
-  birthDate: string | null;
-  breed: string;
-  specie: string;
-  sex: string;
-  size: string;
-  status: string;
-  description: string | null;
-  shelter: string;
-  colors?: string[];
-  vaccinations?: { vaccineCode: string; administeredAt: string }[];
-  statusHistory?: { status: string; changedAt: string }[];
-  events?: { name: string; description: string | null; createdAt: string }[];
-}[];
+} from "@/db/schema";
+import petsData from "./data/pets.json";
 
 export async function seedPets(db: db) {
   const [allSpecies, allStatuses, allShelters, allColors, allVaccines] =

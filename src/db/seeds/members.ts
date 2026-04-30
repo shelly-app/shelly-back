@@ -1,6 +1,6 @@
-import type { db } from "#/db/index.js";
-import { shelter, shelterMembers, users } from "#/db/schema/index.js";
-import { seedAdminEmails } from "#/env.js";
+import type { db } from "@/db";
+import { shelter, shelterMembers, users } from "@/db/schema";
+import { seedAdminEmails } from "@/env";
 
 export async function seedMembers(db: db) {
   if (!seedAdminEmails) return;

@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
 import type { ZodOpenApiPathsObject } from "zod-openapi";
-import { StatusCodes } from "#/api/constants.js";
-import { authMiddleware } from "#/api/middleware/auth.js";
+import { StatusCodes } from "@/api/constants";
+import { authMiddleware } from "@/api/middleware/auth";
 import {
   getAllPets,
   getColors,
@@ -10,8 +10,8 @@ import {
   getSpecies,
   getStatus,
   getVaccines,
-} from "#/api/pets/handlers.js";
-import { petIdParamsSchema, petResponseSchema } from "#/api/pets/schemas.js";
+} from "@/api/pets/handlers";
+import { petIdParamsSchema, petResponseSchema } from "@/api/pets/schemas";
 
 export const petsRouter = Router();
 

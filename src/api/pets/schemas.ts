@@ -1,6 +1,6 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { pet } from "#/db/schema/index.js";
+import { pet } from "@/db/schema";
 
 export const petIdParamsSchema = z.object({
   id: z.coerce

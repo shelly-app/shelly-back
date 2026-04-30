@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import { StatusCodes } from "#/api/constants.js";
-import { petIdParamsSchema } from "#/api/pets/schemas.js";
+import { StatusCodes } from "@/api/constants";
+import { petIdParamsSchema } from "@/api/pets/schemas";
 import {
   findAllColors,
   findAllPublicPets,
@@ -8,7 +8,7 @@ import {
   findAllStatuses,
   findAllVaccines,
   findPublicPetById,
-} from "#/api/pets/services.js";
+} from "@/api/pets/services";
 
 export async function getAllPets(_req: Request, res: Response) {
   const pets = await findAllPublicPets();

@@ -7,7 +7,7 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { pet } from "#/db/schema/pet.js";
+import { pet } from "@/db/schema/pet";
 
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),

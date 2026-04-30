@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { pgTable, serial, varchar } from "drizzle-orm/pg-core";
-import { timestamps } from "#/db/schema/helpers/timestamps.js";
-import { shelterMembers } from "#/db/schema/shelter-members.js";
+import { timestamps } from "@/db/schema/helpers/timestamps";
+import { shelterMembers } from "@/db/schema/shelter-members";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),

@@ -1,17 +1,17 @@
 import { Router } from "express";
 import type { ZodOpenApiPathsObject } from "zod-openapi";
-import { Permissions, StatusCodes } from "#/api/constants.js";
-import { requirePermission } from "#/api/middleware/require-permission.js";
+import { Permissions, StatusCodes } from "@/api/constants";
+import { requirePermission } from "@/api/middleware/require-permission";
 import {
   handleGetMembers,
   handleRegisterMember,
-} from "#/api/shelters/members/handlers.js";
+} from "@/api/shelters/members/handlers";
 import {
   memberParamsSchema,
   memberResponseSchema,
   registerMemberBodySchema,
   registerMemberResponseSchema,
-} from "#/api/shelters/members/schemas.js";
+} from "@/api/shelters/members/schemas";
 
 export const shelterMembersRouter = Router({ mergeParams: true });
 

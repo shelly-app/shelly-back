@@ -1,6 +1,6 @@
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { shelter } from "#/db/schema/index.js";
+import { shelter } from "@/db/schema";
 
 export const shelterIdParamsSchema = z.object({
   id: z.coerce

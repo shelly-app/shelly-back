@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import type { z } from "zod";
-import type { detailedPetResponseSchema } from "#/api/pets/schemas.js";
-import { db } from "#/db/index.js";
-import { shelter } from "#/db/schema/index.js";
+import type { detailedPetResponseSchema } from "@/api/pets/schemas";
+import { db } from "@/db";
+import { shelter } from "@/db/schema";
 
 export async function findAllShelters() {
   return db.query.shelter.findMany({

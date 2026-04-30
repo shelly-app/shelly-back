@@ -1,11 +1,11 @@
 import type { Request, Response } from "express";
-import { StatusCodes } from "#/api/constants.js";
-import { shelterIdParamsSchema } from "#/api/shelters/schemas.js";
+import { StatusCodes } from "@/api/constants";
+import { shelterIdParamsSchema } from "@/api/shelters/schemas";
 import {
   findAllShelters,
   findShelterById,
   findShelterPets,
-} from "#/api/shelters/services.js";
+} from "@/api/shelters/services";
 
 export async function getAllShelters(_req: Request, res: Response) {
   const shelters = await findAllShelters();

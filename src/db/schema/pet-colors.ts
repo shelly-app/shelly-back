@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { integer, pgTable, primaryKey } from "drizzle-orm/pg-core";
-import { colors } from "#/db/schema/colors.js";
-import { pet } from "#/db/schema/pet.js";
+import { colors } from "@/db/schema/colors";
+import { pet } from "@/db/schema/pet";
 
 export const petColors = pgTable(
   "pet_colors",
