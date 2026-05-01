@@ -10,27 +10,18 @@ import {
   updateUserName,
   updateUserShelterRole,
 } from "@/api/users/services";
+import type { User } from "@/db/schema";
 
 export async function getMe(req: Request, res: Response) {
-  const user = req.user;
-  if (!user) {
-    return res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
-  }
+  const user = req.user as User;
 
   const result = await getAuthenticatedUser(user.id);
-
-  if (!result) {
-    return res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
-  }
 
   return res.status(StatusCodes.OK).json(result);
 }
 
 export async function getUser(req: Request, res: Response) {
-  const currentUser = req.user;
-  if (!currentUser) {
-    return res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
-  }
+  const currentUser = req.user as User;
 
   const { id } = userIdParamsSchema.parse(req.params);
   const result = await findUserWithSharedShelters(currentUser.id, id);
@@ -43,10 +34,7 @@ export async function getUser(req: Request, res: Response) {
 }
 
 export async function updateUser(req: Request, res: Response) {
-  const currentUser = req.user;
-  if (!currentUser) {
-    return res.status(StatusCodes.UNAUTHORIZED).json({ error: "Unauthorized" });
-  }
+  const currentUser = req.user as User;
 
   const { id } = userIdParamsSchema.parse(req.params);
   const body = updateUserBodySchema.parse(req.body);
