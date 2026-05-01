@@ -1,10 +1,7 @@
-export { seedColors } from "./colors";
 export { seedMembers } from "./members";
 export { seedPermissions } from "./permissions";
 export { seedPets } from "./pet";
-export { seedPetStatus } from "./pet-status";
 export { seedRolePermissions } from "./role-permissions";
 export { seedRoles } from "./roles";
 export { seedShelter } from "./shelter";
-export { seedSpecies } from "./species";
 export { seedVaccines } from "./vaccines";

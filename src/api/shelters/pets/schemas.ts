@@ -1,5 +1,12 @@
 import { z } from "zod";
 import { petInsertSchema } from "@/api/pets/schemas";
+import {
+  colorEnum,
+  sexEnum,
+  sizeEnum,
+  specieEnum,
+  statusEnum,
+} from "@/db/schema";
 
 export const shelterPetParamsSchema = z.object({
   shelterId: z.coerce.number().int().positive(),
@@ -14,32 +21,18 @@ export const registerPetBodySchema = petInsertSchema
   .omit({
     id: true,
     shelterId: true,
-    statusId: true,
-    specieId: true,
   })
   .extend({
     birthDate: z.iso.date().optional(),
-    colors: z.array(z.string().trim().toLowerCase().min(1)).optional(),
-    status: z.string().trim().toLowerCase().min(1),
-    specie: z.string().trim().toLowerCase().min(1),
+    colors: z.array(z.enum(colorEnum.enumValues)).optional(),
+    status: z.enum(statusEnum.enumValues),
+    specie: z.enum(specieEnum.enumValues),
+    sex: z.enum(sexEnum.enumValues),
+    size: z.enum(sizeEnum.enumValues),
     breed: z.string().trim().min(1).optional(),
-    sex: z.enum(["male", "female"]).optional(),
-    size: z.enum(["small", "medium", "large"]).optional(),
   });
 
-export const updatePetBodySchema = petInsertSchema
-  .omit({
-    id: true,
-    shelterId: true,
-    statusId: true,
-    specieId: true,
-  })
-  .extend({
-    colors: z.array(z.string().trim().toLowerCase().min(1)),
-    status: z.string().trim().toLowerCase().min(1),
-    specie: z.string().trim().toLowerCase().min(1),
-  })
-  .partial();
+export const updatePetBodySchema = registerPetBodySchema.partial();
 
 export const registerVaccinationBodySchema = z.object({
   vaccineCode: z.string(),

@@ -1,41 +1,30 @@
 import type { db } from "@/db";
 import {
-  colors,
+  type ColorValue,
   events,
   pet,
-  petColors,
-  petStatus,
-  petStatusHistory,
+  type SpecieValue,
+  type StatusValue,
   shelter,
-  species,
   vaccinations,
   vaccines,
 } from "@/db/schema";
 import petsData from "./data/pets.json";
 
 export async function seedPets(db: db) {
-  const [allSpecies, allStatuses, allShelters, allColors, allVaccines] =
-    await Promise.all([
-      db.select().from(species),
-      db.select().from(petStatus),
-      db.select().from(shelter),
-      db.select().from(colors),
-      db.select().from(vaccines),
-    ]);
+  const [allShelters, allVaccines] = await Promise.all([
+    db.select().from(shelter),
+    db.select().from(vaccines),
+  ]);
 
-  const speciesMap = new Map(allSpecies.map((s) => [s.name, s.id]));
-  const statusMap = new Map(allStatuses.map((s) => [s.status, s.id]));
   const shelterMap = new Map(allShelters.map((s) => [s.name, s.id]));
-  const colorsMap = new Map(allColors.map((c) => [c.color, c.id]));
   const vaccinesMap = new Map(allVaccines.map((v) => [v.code, v.id]));
 
   for (const p of petsData) {
-    const specieId = speciesMap.get(p.specie);
-    const statusId = statusMap.get(p.status);
     const shelterId = shelterMap.get(p.shelter);
 
-    if (!specieId || !statusId || !shelterId) {
-      throw new Error(`Failed to resolve relations for pet ${p.name}`);
+    if (!shelterId) {
+      throw new Error(`Failed to resolve shelter for pet ${p.name}`);
     }
 
     const [insertedPet] = await db
@@ -46,29 +35,16 @@ export async function seedPets(db: db) {
         breed: p.breed,
         sex: p.sex as "male" | "female",
         size: p.size as "small" | "medium" | "large",
+        specie: p.specie as SpecieValue,
+        colors: p.colors as ColorValue[] | undefined,
+        status: p.status as StatusValue,
         description: p.description,
-        specieId,
-        statusId,
         shelterId,
       })
       .returning();
 
     if (!insertedPet) {
       throw new Error(`Failed to insert pet ${p.name}`);
-    }
-
-    if (p.colors && p.colors.length > 0) {
-      const colorIds = p.colors
-        .map((cName) => colorsMap.get(cName))
-        .filter((id) => id !== undefined);
-
-      if (colorIds.length > 0) {
-        const petColorValues = colorIds.map((colorId) => ({
-          petId: insertedPet.id,
-          colorId,
-        }));
-        await db.insert(petColors).values(petColorValues);
-      }
     }
 
     if (p.vaccinations && p.vaccinations.length > 0) {
@@ -84,21 +60,6 @@ export async function seedPets(db: db) {
         };
       });
       await db.insert(vaccinations).values(vaxes);
-    }
-
-    if (p.statusHistory && p.statusHistory.length > 0) {
-      const histories = p.statusHistory.map((h) => {
-        const hStatusId = statusMap.get(h.status);
-        if (!hStatusId) {
-          throw new Error(`Failed to resolve status ${h.status}`);
-        }
-        return {
-          petId: insertedPet.id,
-          statusId: hStatusId,
-          changedAt: new Date(h.changedAt),
-        };
-      });
-      await db.insert(petStatusHistory).values(histories);
     }
 
     if (p.events && p.events.length > 0) {

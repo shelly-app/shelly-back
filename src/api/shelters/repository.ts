@@ -17,27 +17,11 @@ export async function findById(id: number) {
 
 export async function findPets(shelterId: number) {
   return db.query.pet.findMany({
-    where: (pet, { and, eq, isNull: petIsNull }) =>
-      and(petIsNull(pet.deletedAt), eq(pet.shelterId, shelterId)),
+    where: (p, { and, eq, isNull }) =>
+      and(isNull(p.deletedAt), eq(p.shelterId, shelterId)),
     with: {
-      specie: true,
-      status: true,
       shelter: true,
-      petColors: {
-        with: {
-          color: true,
-        },
-      },
-      vaccinations: {
-        with: {
-          vaccine: true,
-        },
-      },
-      statusHistory: {
-        with: {
-          status: true,
-        },
-      },
+      vaccinations: { with: { vaccine: true } },
       events: true,
     },
   });
