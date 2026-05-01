@@ -1,38 +1,23 @@
-import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { hasPermission } from "@/api/middleware/require-permission";
-import { db } from "@/db";
-import { roles, shelterMembers, users } from "@/db/schema";
+import * as repository from "@/api/users/repository";
 
 export async function findUserWithSharedShelters(
   currentUserId: number,
   targetUserId: number,
 ) {
-  const currentUserShelterIds = await db
-    .select({ shelterId: shelterMembers.shelterId })
-    .from(shelterMembers)
-    .where(eq(shelterMembers.userId, currentUserId));
-
-  const shelterIds = currentUserShelterIds.map((s) => s.shelterId);
+  const shelterIds = await repository.findShelterIdsByUserId(currentUserId);
 
   if (shelterIds.length === 0) return null;
 
-  const targetMemberships = await db.query.shelterMembers.findMany({
-    where: and(
-      eq(shelterMembers.userId, targetUserId),
-      inArray(shelterMembers.shelterId, shelterIds),
-    ),
-    with: {
-      shelter: true,
-      role: true,
-    },
-  });
+  const targetMemberships = await repository.findMembershipsByUserAndShelterIds(
+    targetUserId,
+    shelterIds,
+  );
 
   if (targetMemberships.length === 0) return null;
 
-  const targetUser = await db.query.users.findFirst({
-    where: eq(users.id, targetUserId),
-  });
+  const targetUser = await repository.findById(targetUserId);
 
   if (!targetUser) return null;
 
@@ -49,26 +34,19 @@ export async function findUserWithSharedShelters(
 }
 
 export async function updateUserName(userId: number, name: string) {
-  await db.update(users).set({ name }).where(eq(users.id, userId));
+  await repository.updateName(userId, name);
 }
 
 export async function canEditUser(
   currentUserId: number,
   targetUserId: number,
 ): Promise<boolean> {
-  const currentUserShelterIds = await db
-    .select({ shelterId: shelterMembers.shelterId })
-    .from(shelterMembers)
-    .where(eq(shelterMembers.userId, currentUserId));
+  const shelterIds = await repository.findShelterIdsByUserId(currentUserId);
 
-  const shelterIds = currentUserShelterIds.map((s) => s.shelterId);
-
-  const targetMemberships = await db.query.shelterMembers.findMany({
-    where: and(
-      eq(shelterMembers.userId, targetUserId),
-      inArray(shelterMembers.shelterId, shelterIds),
-    ),
-  });
+  const targetMemberships = await repository.findMembershipsByUserAndShelterIds(
+    targetUserId,
+    shelterIds,
+  );
 
   if (targetMemberships.length === 0) return false;
 
@@ -88,9 +66,7 @@ export async function updateUserShelterRole(
   shelterId: number,
   roleName: string,
 ) {
-  const role = await db.query.roles.findFirst({
-    where: eq(roles.name, roleName),
-  });
+  const role = await repository.findRoleByName(roleName);
 
   if (!role) {
     throw new z.ZodError([
@@ -102,46 +78,21 @@ export async function updateUserShelterRole(
     ]);
   }
 
-  const membership = await db.query.shelterMembers.findFirst({
-    where: and(
-      eq(shelterMembers.userId, userId),
-      eq(shelterMembers.shelterId, shelterId),
-    ),
-  });
+  const membership = await repository.findShelterMember(userId, shelterId);
 
   if (!membership) return null;
 
-  await db
-    .update(shelterMembers)
-    .set({ roleId: role.id })
-    .where(
-      and(
-        eq(shelterMembers.userId, userId),
-        eq(shelterMembers.shelterId, shelterId),
-      ),
-    );
+  await repository.updateShelterRole(userId, shelterId, role.id);
 
   return true;
 }
 
 export async function findUserById(userId: number) {
-  return db.query.users.findFirst({
-    where: eq(users.id, userId),
-  });
+  return repository.findById(userId);
 }
 
 export async function getAuthenticatedUser(userId: number) {
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-    with: {
-      shelterMemberships: {
-        with: {
-          shelter: true,
-          role: true,
-        },
-      },
-    },
-  });
+  const user = await repository.findShelterMemberships(userId);
 
   if (!user) return null;
 

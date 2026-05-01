@@ -1,34 +1,15 @@
-import { and, eq, inArray } from "drizzle-orm";
 import type { z } from "zod";
 import { ZodError } from "zod";
 import type {
   detailedPetResponseSchema,
   petResponseSchema,
 } from "@/api/pets/schemas";
+import * as repository from "@/api/shelters/pets/repository";
 import { db } from "@/db";
-import { colors, pet, petColors, petStatusHistory } from "@/db/schema";
 import type { Color } from "@/db/schema/colors";
-import { events } from "@/db/schema/events";
-import { vaccinations } from "@/db/schema/vaccinations";
 
 export async function findShelterPetDetailed(shelterId: number, petId: number) {
-  const result = await db.query.pet.findFirst({
-    where: (pet, { and, eq, isNull }) =>
-      and(
-        isNull(pet.deletedAt),
-        eq(pet.id, petId),
-        eq(pet.shelterId, shelterId),
-      ),
-    with: {
-      specie: true,
-      status: true,
-      shelter: true,
-      petColors: { with: { color: true } },
-      vaccinations: { with: { vaccine: true } },
-      statusHistory: { with: { status: true } },
-      events: true,
-    },
-  });
+  const result = await repository.findById(petId, shelterId);
 
   if (!result) return null;
 
@@ -78,15 +59,9 @@ export async function registerPet(
   },
 ) {
   const [statusRecord, specieRecord, shelterRecord] = await Promise.all([
-    db.query.petStatus.findFirst({
-      where: (ps, { eq }) => eq(ps.status, body.status),
-    }),
-    db.query.species.findFirst({
-      where: (s, { eq }) => eq(s.name, body.specie),
-    }),
-    db.query.shelter.findFirst({
-      where: (s, { eq }) => eq(s.id, shelterId),
-    }),
+    repository.findStatusByName(body.status),
+    repository.findSpecieByName(body.specie),
+    repository.findShelterById(shelterId),
   ]);
 
   if (!statusRecord) {
@@ -115,9 +90,7 @@ export async function registerPet(
 
   let matchingColors: Color[] = [];
   if (body.colors && body.colors.length > 0) {
-    matchingColors = await db.query.colors.findMany({
-      where: inArray(colors.color, body.colors),
-    });
+    matchingColors = await repository.findColorsByNames(body.colors);
 
     if (matchingColors.length !== body.colors.length) {
       const invalidColors = body.colors.filter(
@@ -133,31 +106,24 @@ export async function registerPet(
     }
   }
 
-  const registeredPet = await db.transaction(async (tx) => {
+  const registeredPet = await db.transaction(async (_tx) => {
     const { status: _status, specie: _specie, colors: _colors, ...data } = body;
-    const [newPet] = await tx
-      .insert(pet)
-      .values({
-        ...data,
-        statusId: statusRecord.id,
-        specieId: specieRecord.id,
-        shelterId: shelterId,
-      })
-      .returning();
-
-    if (!newPet) {
-      throw new Error("Failed to insert pet");
-    }
+    const newPet = await repository.createPet({
+      ...data,
+      statusId: statusRecord.id,
+      specieId: specieRecord.id,
+      shelterId: shelterId,
+    });
 
     if (matchingColors.length > 0) {
       const petColorValues = matchingColors.map((c) => ({
         petId: newPet.id,
         colorId: c.id,
       }));
-      await tx.insert(petColors).values(petColorValues);
+      await repository.createPetColors(petColorValues);
     }
 
-    await tx.insert(petStatusHistory).values({
+    await repository.createStatusHistory({
       petId: newPet.id,
       statusId: statusRecord.id,
     });
@@ -198,38 +164,30 @@ export async function updatePet(
     colors?: string[];
   },
 ) {
-  const existing = await db.query.pet.findFirst({
-    where: (pet, { and, eq, isNull }) =>
-      and(
-        isNull(pet.deletedAt),
-        eq(pet.id, petId),
-        eq(pet.shelterId, shelterId),
-      ),
-    with: {
-      specie: true,
-      status: true,
-      shelter: true,
-      petColors: { with: { color: true } },
-    },
-  });
+  const existing = await repository.findById(petId, shelterId);
 
   if (!existing) return { error: "Pet not found" as const };
 
-  const updateData: Partial<typeof pet.$inferInsert> = {};
+  const updateData: {
+    name?: string;
+    birthDate?: string;
+    breed?: string;
+    sex?: "male" | "female";
+    size?: "small" | "medium" | "large";
+    description?: string;
+    statusId?: number;
+    specieId?: number;
+  } = {};
 
   const statusValue = body.status;
   const specieValue = body.specie;
 
   const [statusRecord, specieRecord] = await Promise.all([
     statusValue
-      ? db.query.petStatus.findFirst({
-          where: (ps, { eq }) => eq(ps.status, statusValue),
-        })
+      ? repository.findStatusByName(statusValue)
       : Promise.resolve(null),
     specieValue
-      ? db.query.species.findFirst({
-          where: (s, { eq }) => eq(s.name, specieValue),
-        })
+      ? repository.findSpecieByName(specieValue)
       : Promise.resolve(null),
   ]);
 
@@ -266,9 +224,7 @@ export async function updatePet(
   let matchingColors: Color[] = [];
   if (body.colors !== undefined) {
     if (body.colors.length > 0) {
-      matchingColors = await db.query.colors.findMany({
-        where: inArray(colors.color, body.colors),
-      });
+      matchingColors = await repository.findColorsByNames(body.colors);
 
       if (matchingColors.length !== body.colors.length) {
         const invalidColors = body.colors.filter(
@@ -286,54 +242,50 @@ export async function updatePet(
   }
 
   if (body.name !== undefined && body.name !== existing.name) {
-    updateData.name = body.name;
+    updateData.name = body.name ?? undefined;
   }
   if (body.birthDate !== undefined && body.birthDate !== existing.birthDate) {
-    updateData.birthDate = body.birthDate;
+    updateData.birthDate = body.birthDate ?? undefined;
   }
   if (body.breed !== undefined && body.breed !== existing.breed) {
-    updateData.breed = body.breed;
+    updateData.breed = body.breed ?? undefined;
   }
   if (body.sex !== undefined && body.sex !== existing.sex) {
-    updateData.sex = body.sex;
+    updateData.sex = body.sex ?? undefined;
   }
   if (body.size !== undefined && body.size !== existing.size) {
-    updateData.size = body.size;
+    updateData.size = body.size ?? undefined;
   }
   if (
     body.description !== undefined &&
     body.description !== existing.description
   ) {
-    updateData.description = body.description;
+    updateData.description = body.description ?? undefined;
   }
 
-  const updatedPet = await db.transaction(async (tx) => {
+  const updatedPet = await db.transaction(async (_tx) => {
     let petRow = existing;
 
     if (Object.keys(updateData).length > 0) {
-      const [res] = await tx
-        .update(pet)
-        .set(updateData)
-        .where(eq(pet.id, petId))
-        .returning();
+      const res = await repository.updatePet(petId, updateData);
       if (res) {
         petRow = { ...petRow, ...res };
       }
     }
 
     if (updateData.statusId !== undefined) {
-      await tx.insert(petStatusHistory).values({
+      await repository.createStatusHistory({
         petId: petId,
         statusId: updateData.statusId,
       });
     }
 
     if (body.colors !== undefined) {
-      await tx.delete(petColors).where(eq(petColors.petId, petId));
+      await repository.deletePetColors(petId);
       if (matchingColors.length > 0) {
-        await tx
-          .insert(petColors)
-          .values(matchingColors.map((c) => ({ petId, colorId: c.id })));
+        await repository.createPetColors(
+          matchingColors.map((c) => ({ petId, colorId: c.id })),
+        );
       }
     }
 
@@ -362,12 +314,13 @@ export async function updatePet(
 }
 
 export async function deletePet(shelterId: number, petId: number) {
-  const deletedPet = await db
-    .delete(pet)
-    .where(and(eq(pet.id, petId), eq(pet.shelterId, shelterId)))
-    .returning({ id: pet.id });
+  const existing = await repository.findById(petId, shelterId);
 
-  return deletedPet.length > 0;
+  if (!existing) return false;
+
+  await repository.deletePetById(petId);
+
+  return true;
 }
 
 export async function registerVaccination(
@@ -376,19 +329,14 @@ export async function registerVaccination(
   vaccineCode: string,
   administeredAt?: Date,
 ) {
-  const data = await db.query.pet.findFirst({
-    where: (p, { and, eq }) => and(eq(p.id, petId), eq(p.shelterId, shelterId)),
-    with: {
-      specie: true,
-    },
-  });
+  const data = await repository.findById(petId, shelterId);
 
   if (!data) return { error: "Pet not found" as const };
 
-  const vaccine = await db.query.vaccines.findFirst({
-    where: (v, { and, eq }) =>
-      and(eq(v.code, vaccineCode), eq(v.specieId, data.specieId)),
-  });
+  const vaccine = await repository.findVaccineByCodeAndSpecie(
+    vaccineCode,
+    data.specieId,
+  );
 
   if (!vaccine) {
     return {
@@ -397,14 +345,11 @@ export async function registerVaccination(
     };
   }
 
-  const [vaccination] = await db
-    .insert(vaccinations)
-    .values({
-      petId,
-      vaccineId: vaccine.id,
-      administeredAt,
-    })
-    .returning();
+  const vaccination = await repository.createVaccinationRecord({
+    petId,
+    vaccineId: vaccine.id,
+    administeredAt,
+  });
 
   if (!vaccination) {
     throw new Error("Failed to register vaccination");
@@ -425,20 +370,15 @@ export async function registerEvent(
   name: string,
   description?: string,
 ) {
-  const petInShelter = await db.query.pet.findFirst({
-    where: (p, { and, eq }) => and(eq(p.id, petId), eq(p.shelterId, shelterId)),
-  });
+  const petInShelter = await repository.findById(petId, shelterId);
 
   if (!petInShelter) return { error: "Pet not found in shelter" as const };
 
-  const [newEvent] = await db
-    .insert(events)
-    .values({
-      petId,
-      name,
-      description,
-    })
-    .returning();
+  const newEvent = await repository.createEventRecord({
+    petId,
+    name,
+    description,
+  });
 
   if (!newEvent) {
     throw new Error("Failed to register event");
@@ -459,18 +399,11 @@ export async function deleteEvent(
   petId: number,
   eventId: number,
 ) {
-  const petInShelter = await db.query.pet.findFirst({
-    where: (p, { and, eq }) => and(eq(p.id, petId), eq(p.shelterId, shelterId)),
-  });
+  const petInShelter = await repository.findById(petId, shelterId);
 
   if (!petInShelter) return { error: "Pet not found in shelter" as const };
 
-  const deletedEvent = await db
-    .delete(events)
-    .where(and(eq(events.id, eventId), eq(events.petId, petId)))
-    .returning({ id: events.id });
-
-  if (deletedEvent.length === 0) return { error: "Event not found" as const };
+  await repository.deleteEventRecord(eventId, petId);
 
   return { data: true };
 }
