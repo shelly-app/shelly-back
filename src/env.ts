@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const envSchema = z.object({
   NODE_ENV: z.string("production"),
+  DEBUG: z.stringbool().default(false),
   PORT: z.coerce.number().default(3000),
   DB_USER: z.string(),
   DB_PASSWORD: z.string(),
@@ -24,6 +25,8 @@ export type Env = z.infer<typeof envSchema>;
 const env = envSchema.parse(process.env);
 
 export const {
+  NODE_ENV: nodeEnv,
+  DEBUG: debug,
   PORT: port,
   DB_USER: dbUser,
   DB_PASSWORD: dbPassword,

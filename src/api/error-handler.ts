@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 import { StatusCodes } from "@/api/constants";
+import { debug } from "@/env";
 
 export function handleError(
   err: Error,
@@ -14,7 +15,9 @@ export function handleError(
       .status(StatusCodes.BAD_REQUEST)
       .json({ error: "Validation Error", details: err.issues });
   }
-  return res
-    .status(StatusCodes.INTERNAL_SERVER_ERROR)
-    .json({ error: "Internal Server Error" });
+  const response: Record<string, unknown> = { error: "Internal Server Error" };
+  if (debug && err.stack) {
+    response.stack = err.stack;
+  }
+  return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(response);
 }
