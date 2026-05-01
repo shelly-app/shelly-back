@@ -1,5 +1,5 @@
 {
-  "id": "faac5e0f-683d-47b8-b4f8-0022aaf4d482",
+  "id": "77c510ec-d8e3-423a-9804-b7bf7a9fae16",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -32,9 +32,10 @@
           "primaryKey": false,
           "notNull": false
         },
-        "specie_id": {
-          "name": "specie_id",
-          "type": "integer",
+        "specie": {
+          "name": "specie",
+          "type": "specie",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
@@ -43,18 +44,25 @@
           "type": "sex",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "size": {
           "name": "size",
           "type": "size",
           "typeSchema": "public",
           "primaryKey": false,
+          "notNull": true
+        },
+        "colors": {
+          "name": "colors",
+          "type": "text",
+          "primaryKey": false,
           "notNull": false
         },
-        "status_id": {
-          "name": "status_id",
-          "type": "integer",
+        "status": {
+          "name": "status",
+          "type": "status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
@@ -92,24 +100,6 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "pets_specie_id_species_id_fk": {
-          "name": "pets_specie_id_species_id_fk",
-          "tableFrom": "pets",
-          "tableTo": "species",
-          "columnsFrom": ["specie_id"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "pets_status_id_pet_status_id_fk": {
-          "name": "pets_status_id_pet_status_id_fk",
-          "tableFrom": "pets",
-          "tableTo": "pet_status",
-          "columnsFrom": ["status_id"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
         "pets_shelter_id_shelters_id_fk": {
           "name": "pets_shelter_id_shelters_id_fk",
           "tableFrom": "pets",
@@ -120,31 +110,6 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.colors": {
-      "name": "colors",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "color": {
-          "name": "color",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -257,137 +222,6 @@
           "columns": ["slug"]
         }
       },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.pet_colors": {
-      "name": "pet_colors",
-      "schema": "",
-      "columns": {
-        "pet_id": {
-          "name": "pet_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "color_id": {
-          "name": "color_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "pet_colors_pet_id_pets_id_fk": {
-          "name": "pet_colors_pet_id_pets_id_fk",
-          "tableFrom": "pet_colors",
-          "tableTo": "pets",
-          "columnsFrom": ["pet_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "pet_colors_color_id_colors_id_fk": {
-          "name": "pet_colors_color_id_colors_id_fk",
-          "tableFrom": "pet_colors",
-          "tableTo": "colors",
-          "columnsFrom": ["color_id"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "pet_colors_pet_id_color_id_pk": {
-          "name": "pet_colors_pet_id_color_id_pk",
-          "columns": ["pet_id", "color_id"]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.pet_status": {
-      "name": "pet_status",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.pet_status_history": {
-      "name": "pet_status_history",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "pet_id": {
-          "name": "pet_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status_id": {
-          "name": "status_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "changed_at": {
-          "name": "changed_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "pet_status_history_pet_id_pets_id_fk": {
-          "name": "pet_status_history_pet_id_pets_id_fk",
-          "tableFrom": "pet_status_history",
-          "tableTo": "pets",
-          "columnsFrom": ["pet_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "pet_status_history_status_id_pet_status_id_fk": {
-          "name": "pet_status_history_status_id_pet_status_id_fk",
-          "tableFrom": "pet_status_history",
-          "tableTo": "pet_status",
-          "columnsFrom": ["status_id"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -636,37 +470,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.species": {
-      "name": "species",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "species_name_unique": {
-          "name": "species_name_unique",
-          "nullsNotDistinct": false,
-          "columns": ["name"]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.users": {
       "name": "users",
       "schema": "",
@@ -812,26 +615,10 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "specie_id": {
-          "name": "specie_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "vaccines_specie_id_species_id_fk": {
-          "name": "vaccines_specie_id_species_id_fk",
-          "tableFrom": "vaccines",
-          "tableTo": "species",
-          "columnsFrom": ["specie_id"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "vaccines_code_unique": {
@@ -846,6 +633,11 @@
     }
   },
   "enums": {
+    "public.color": {
+      "name": "color",
+      "schema": "public",
+      "values": ["black", "white", "brown", "golden"]
+    },
     "public.sex": {
       "name": "sex",
       "schema": "public",
@@ -855,6 +647,16 @@
       "name": "size",
       "schema": "public",
       "values": ["small", "medium", "large"]
+    },
+    "public.specie": {
+      "name": "specie",
+      "schema": "public",
+      "values": ["dog", "cat"]
+    },
+    "public.status": {
+      "name": "status",
+      "schema": "public",
+      "values": ["in_shelter", "adopted", "in_foster", "deceased"]
     }
   },
   "schemas": {},

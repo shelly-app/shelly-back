@@ -18,14 +18,9 @@ async function runSeeds() {
   for (const table of [
     schema.shelterMembers,
     schema.events,
-    schema.petStatusHistory,
     schema.vaccinations,
-    schema.petColors,
     schema.pet,
     schema.vaccines,
-    schema.petStatus,
-    schema.colors,
-    schema.species,
     schema.shelter,
     schema.roles,
     schema.permissions,
@@ -34,9 +29,6 @@ async function runSeeds() {
     await resetTable(db, table);
   }
 
-  await seeds.seedSpecies(db);
-  await seeds.seedPetStatus(db);
-  await seeds.seedColors(db);
   await seeds.seedVaccines(db);
   await seeds.seedShelter(db);
   await seeds.seedPets(db);
