@@ -1,48 +1,17 @@
-import { eq } from "drizzle-orm";
 import type { z } from "zod";
 import type { detailedPetResponseSchema } from "@/api/pets/schemas";
-import { db } from "@/db";
-import { shelter } from "@/db/schema";
+import * as repository from "@/api/shelters/repository";
 
 export async function findAllShelters() {
-  return db.query.shelter.findMany({
-    columns: {
-      id: false,
-    },
-  });
+  return repository.findAll();
 }
 
 export async function findShelterById(id: number) {
-  const shelters = await db.select().from(shelter).where(eq(shelter.id, id));
-  return shelters[0] ?? null;
+  return repository.findById(id);
 }
 
 export async function findShelterPets(shelterId: number) {
-  const pets = await db.query.pet.findMany({
-    where: (pet, { and, eq, isNull }) =>
-      and(isNull(pet.deletedAt), eq(pet.shelterId, shelterId)),
-    with: {
-      specie: true,
-      status: true,
-      shelter: true,
-      petColors: {
-        with: {
-          color: true,
-        },
-      },
-      vaccinations: {
-        with: {
-          vaccine: true,
-        },
-      },
-      statusHistory: {
-        with: {
-          status: true,
-        },
-      },
-      events: true,
-    },
-  });
+  const pets = await repository.findPets(shelterId);
 
   return pets.map(
     (p): z.infer<typeof detailedPetResponseSchema> => ({

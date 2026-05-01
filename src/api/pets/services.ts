@@ -1,32 +1,9 @@
 import type { z } from "zod";
+import * as repository from "@/api/pets/repository";
 import type { petResponseSchema } from "@/api/pets/schemas";
-import { db } from "@/db";
-import { petStatus } from "@/db/schema";
 
 export async function findAllPublicPets() {
-  const pets = await db.query.pet.findMany({
-    where: (pet, { and, eq, inArray, isNull }) =>
-      and(
-        isNull(pet.deletedAt),
-        inArray(
-          pet.statusId,
-          db
-            .select({ id: petStatus.id })
-            .from(petStatus)
-            .where(eq(petStatus.status, "in_shelter")),
-        ),
-      ),
-    with: {
-      specie: true,
-      status: true,
-      shelter: true,
-      petColors: {
-        with: {
-          color: true,
-        },
-      },
-    },
-  });
+  const pets = await repository.findAllPublic();
 
   return pets.map(
     (p): z.infer<typeof petResponseSchema> => ({
@@ -46,30 +23,7 @@ export async function findAllPublicPets() {
 }
 
 export async function findPublicPetById(id: number) {
-  const pet = await db.query.pet.findFirst({
-    where: (p, { and, eq, inArray, isNull }) =>
-      and(
-        isNull(p.deletedAt),
-        eq(p.id, id),
-        inArray(
-          p.statusId,
-          db
-            .select({ id: petStatus.id })
-            .from(petStatus)
-            .where(eq(petStatus.status, "in_shelter")),
-        ),
-      ),
-    with: {
-      specie: true,
-      status: true,
-      shelter: true,
-      petColors: {
-        with: {
-          color: true,
-        },
-      },
-    },
-  });
+  const pet = await repository.findByIdPublic(id);
 
   if (!pet) return null;
 
@@ -91,24 +45,20 @@ export async function findPublicPetById(id: number) {
 }
 
 export async function findAllColors() {
-  const result = await db.query.colors.findMany();
+  const result = await repository.findAllColors();
   return result.map((c) => c.color);
 }
 
 export async function findAllSpecies() {
-  return db.query.species.findMany();
+  return repository.findAllSpecies();
 }
 
 export async function findAllStatuses() {
-  return db.query.petStatus.findMany();
+  return repository.findAllStatuses();
 }
 
 export async function findAllVaccines() {
-  const vaccines = await db.query.vaccines.findMany({
-    with: {
-      specie: true,
-    },
-  });
+  const vaccines = await repository.findAllVaccines();
 
   return vaccines.map((v) => ({
     code: v.code,

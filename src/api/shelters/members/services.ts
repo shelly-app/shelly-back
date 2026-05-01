@@ -1,16 +1,8 @@
-import { and, eq } from "drizzle-orm";
 import { ZodError } from "zod";
-import { db } from "@/db";
-import { roles, shelter, shelterMembers, users } from "@/db/schema";
+import * as repository from "@/api/shelters/members/repository";
 
 export async function findShelterMembers(shelterId: number) {
-  const members = await db.query.shelterMembers.findMany({
-    where: eq(shelterMembers.shelterId, shelterId),
-    with: {
-      user: true,
-      role: true,
-    },
-  });
+  const members = await repository.findByShelterId(shelterId);
 
   return members.map((m) => ({
     userId: m.userId,
@@ -26,17 +18,7 @@ export async function registerMember(
   email: string,
   roleName: string,
 ) {
-  const shelterRecord = await db.query.shelter.findFirst({
-    where: eq(shelter.id, shelterId),
-  });
-
-  if (!shelterRecord) {
-    return { error: "Shelter not found" as const, status: 404 as const };
-  }
-
-  const role = await db.query.roles.findFirst({
-    where: eq(roles.name, roleName),
-  });
+  const role = await repository.findRoleByName(roleName);
 
   if (!role) {
     throw new ZodError([
@@ -48,32 +30,24 @@ export async function registerMember(
     ]);
   }
 
-  let user = await db.query.users.findFirst({
-    where: eq(users.email, email),
-  });
+  let user = await repository.findUserByEmail(email);
 
   if (!user) {
-    const [newUser] = await db
-      .insert(users)
-      .values({
-        email: email,
-        name: email.split("@")[0] ?? email,
-        cognitoSub: `pending:${email}`,
-      })
-      .returning();
-    user = newUser;
+    user = await repository.create({
+      email: email,
+      name: email.split("@")[0] ?? email,
+      cognitoSub: `pending:${email}`,
+    });
   }
 
   if (!user) {
     return { error: "Failed to create user" as const, status: 500 as const };
   }
 
-  const existingMembership = await db.query.shelterMembers.findFirst({
-    where: and(
-      eq(shelterMembers.userId, user.id),
-      eq(shelterMembers.shelterId, shelterId),
-    ),
-  });
+  const existingMembership = await repository.findMembership(
+    user.id,
+    shelterId,
+  );
 
   if (existingMembership) {
     return {
@@ -82,7 +56,7 @@ export async function registerMember(
     };
   }
 
-  await db.insert(shelterMembers).values({
+  await repository.createMembership({
     shelterId,
     userId: user.id,
     roleId: role.id,
