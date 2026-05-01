@@ -1,4 +1,3 @@
-import cors from "cors";
 import express from "express";
 import { handleError } from "@/api/error-handler";
 import { openApiRouter } from "@/api/openapi";
@@ -8,20 +7,15 @@ import { usersRouter } from "@/api/users/routes";
 
 export const app = express();
 
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  }),
-);
 app.use(express.json());
 
 app.get("/", (_, res) => {
-  res.redirect("/docs");
+  res.redirect("/api/docs");
 });
-app.use(openApiRouter);
-app.use(usersRouter);
-app.use(sheltersRouter);
-app.use(petsRouter);
+
+app.use("/api", openApiRouter);
+app.use("/api", usersRouter);
+app.use("/api", sheltersRouter);
+app.use("/api", petsRouter);
 
 app.use(handleError);
