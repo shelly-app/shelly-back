@@ -144,6 +144,7 @@ export async function registerPet(
 export async function updatePet(
   shelterId: number,
   petId: number,
+  userId: number,
   body: {
     name?: string;
     birthDate?: string | null;
@@ -248,6 +249,34 @@ export async function updatePet(
       if (res) {
         petRow = { ...petRow, ...res };
       }
+
+      if (body.status !== undefined && body.status !== existing.status) {
+        await repository.createEventRecord({
+          petId,
+          userId,
+          type: "status_change",
+          name: "Status change",
+          description: `Status changed from ${existing.status} to ${body.status}`,
+        });
+      }
+      if (body.name !== undefined && body.name !== existing.name) {
+        await repository.createEventRecord({
+          petId,
+          userId,
+          type: "name_change",
+          name: "Name change",
+          description: `Name changed from "${existing.name}" to "${body.name}"`,
+        });
+      }
+      if (body.size !== undefined && body.size !== existing.size) {
+        await repository.createEventRecord({
+          petId,
+          userId,
+          type: "size_change",
+          name: "Size change",
+          description: `Size changed from ${existing.size} to ${body.size}`,
+        });
+      }
     }
 
     return petRow;
@@ -284,6 +313,7 @@ export async function deletePet(shelterId: number, petId: number) {
 export async function registerVaccination(
   shelterId: number,
   petId: number,
+  userId: number,
   vaccineCode: string,
   administeredAt?: Date,
 ) {
@@ -291,9 +321,15 @@ export async function registerVaccination(
 
   if (!data) return { error: "Pet not found" as const };
 
+  const vaccine = await repository.findVaccineByCode(vaccineCode);
+
+  if (!vaccine) {
+    return { error: "Vaccine not found" as const };
+  }
+
   const vaccination = await repository.createVaccinationRecord({
     petId,
-    vaccineId: 1,
+    vaccineId: vaccine.id,
     administeredAt,
   });
 
@@ -301,10 +337,18 @@ export async function registerVaccination(
     throw new Error("Failed to register vaccination");
   }
 
+  await repository.createEventRecord({
+    petId,
+    userId,
+    type: "vaccination",
+    name: "Vaccination",
+    description: `Vaccination: ${vaccine.name} (${vaccine.code})`,
+  });
+
   return {
     data: {
-      vaccineName: "TBD",
-      vaccineCode: vaccineCode,
+      vaccineName: vaccine.name,
+      vaccineCode: vaccine.code,
       administeredAt: vaccination.administeredAt.toISOString(),
     },
   };
@@ -313,6 +357,7 @@ export async function registerVaccination(
 export async function registerEvent(
   shelterId: number,
   petId: number,
+  userId: number,
   name: string,
   description?: string,
 ) {
@@ -322,6 +367,8 @@ export async function registerEvent(
 
   const newEvent = await repository.createEventRecord({
     petId,
+    userId,
+    type: "user_event",
     name,
     description,
   });
