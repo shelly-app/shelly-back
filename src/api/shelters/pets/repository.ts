@@ -7,7 +7,7 @@ import type {
   SpecieValue,
   StatusValue,
 } from "@/db/schema";
-import { events, pet, shelter, vaccinations } from "@/db/schema";
+import { events, pet, shelter, vaccinations, vaccines } from "@/db/schema";
 
 export async function findById(petId: number, shelterId: number) {
   return db.query.pet.findFirst({
@@ -24,6 +24,12 @@ export async function findById(petId: number, shelterId: number) {
 export async function findShelterById(id: number) {
   return db.query.shelter.findFirst({
     where: eq(shelter.id, id),
+  });
+}
+
+export async function findVaccineByCode(code: string) {
+  return db.query.vaccines.findFirst({
+    where: eq(vaccines.code, code),
   });
 }
 
@@ -83,6 +89,13 @@ export async function createVaccinationRecord(values: {
 
 export async function createEventRecord(values: {
   petId: number;
+  userId: number;
+  type?:
+    | "status_change"
+    | "vaccination"
+    | "user_event"
+    | "name_change"
+    | "size_change";
   name: string;
   description?: string;
 }) {

@@ -6,19 +6,22 @@ import {
   type SpecieValue,
   type StatusValue,
   shelter,
+  users,
   vaccinations,
   vaccines,
 } from "@/db/schema";
 import petsData from "./data/pets.json";
 
 export async function seedPets(db: db) {
-  const [allShelters, allVaccines] = await Promise.all([
+  const [allShelters, allVaccines, allUsers] = await Promise.all([
     db.select().from(shelter),
     db.select().from(vaccines),
+    db.select().from(users),
   ]);
 
   const shelterMap = new Map(allShelters.map((s) => [s.name, s.id]));
   const vaccinesMap = new Map(allVaccines.map((v) => [v.code, v.id]));
+  const defaultUserId = allUsers[0]?.id ?? 1;
 
   for (const p of petsData) {
     const shelterId = shelterMap.get(p.shelter);
@@ -65,6 +68,8 @@ export async function seedPets(db: db) {
     if (p.events && p.events.length > 0) {
       const eventsList = p.events.map((e) => ({
         petId: insertedPet.id,
+        userId: defaultUserId,
+        type: "user_event" as const,
         name: e.name,
         description: e.description,
         createdAt: new Date(e.createdAt),

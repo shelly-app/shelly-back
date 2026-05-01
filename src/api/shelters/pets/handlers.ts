@@ -18,6 +18,7 @@ import {
   registerVaccination,
   updatePet,
 } from "@/api/shelters/pets/services";
+import type { User } from "@/db/schema";
 
 export async function handleGetPet(req: Request, res: Response) {
   const { shelterId, petId } = shelterPetParamsSchema.parse(req.params);
@@ -45,7 +46,8 @@ export async function handleRegisterPet(req: Request, res: Response) {
 export async function handleUpdatePet(req: Request, res: Response) {
   const { shelterId, petId } = shelterPetParamsSchema.parse(req.params);
   const body = updatePetBodySchema.parse(req.body);
-  const result = await updatePet(shelterId, petId, body);
+  const userId = (req.user as User).id;
+  const result = await updatePet(shelterId, petId, userId, body);
 
   if ("error" in result) {
     return res.status(StatusCodes.NOT_FOUND).json({ error: result.error });
@@ -70,9 +72,11 @@ export async function handleRegisterVaccination(req: Request, res: Response) {
   const { vaccineCode, administeredAt } = registerVaccinationBodySchema.parse(
     req.body,
   );
+  const userId = (req.user as User).id;
   const result = await registerVaccination(
     shelterId,
     petId,
+    userId,
     vaccineCode,
     administeredAt,
   );
@@ -87,7 +91,14 @@ export async function handleRegisterVaccination(req: Request, res: Response) {
 export async function handleRegisterEvent(req: Request, res: Response) {
   const { shelterId, petId } = shelterPetParamsSchema.parse(req.params);
   const { name, description } = registerEventBodySchema.parse(req.body);
-  const result = await registerEvent(shelterId, petId, name, description);
+  const userId = (req.user as User).id;
+  const result = await registerEvent(
+    shelterId,
+    petId,
+    userId,
+    name,
+    description,
+  );
 
   if ("error" in result) {
     return res.status(StatusCodes.NOT_FOUND).json({ error: result.error });
