@@ -1,0 +1,11 @@
+[
+  { "roleName": "admin", "permissionSlug": "pets:read" },
+  { "roleName": "admin", "permissionSlug": "pets:write" },
+  { "roleName": "admin", "permissionSlug": "pets:delete" },
+  { "roleName": "admin", "permissionSlug": "vaccinations:write" },
+  { "roleName": "admin", "permissionSlug": "events:write" },
+  { "roleName": "admin", "permissionSlug": "members:read" },
+  { "roleName": "admin", "permissionSlug": "members:write" },
+  { "roleName": "volunteer", "permissionSlug": "pets:read" },
+  { "roleName": "volunteer", "permissionSlug": "members:read" }
+]
