@@ -1,0 +1,15 @@
+[
+  { "code": "RAB", "name": "Rabies", "specie": "dog" },
+  {
+    "code": "DHPP",
+    "name": "Distemper, adenovirus, parainfluenza, and parvovirus",
+    "specie": "dog"
+  },
+  { "code": "BORD", "name": "Bordetella bronchiseptica", "specie": "dog" },
+  {
+    "code": "FVRCP",
+    "name": "Feline viral rhinotracheitis, calicivirus, and panleukopenia",
+    "specie": "cat"
+  },
+  { "code": "FeLV", "name": "Feline leukemia virus", "specie": "cat" }
+]

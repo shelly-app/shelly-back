@@ -1,0 +1,9 @@
+[
+  { "slug": "pets:read", "name": "Read pets" },
+  { "slug": "pets:write", "name": "Create/update pets" },
+  { "slug": "pets:delete", "name": "Delete pets" },
+  { "slug": "vaccinations:write", "name": "Manage vaccinations" },
+  { "slug": "events:write", "name": "Manage events" },
+  { "slug": "members:read", "name": "Read shelter members" },
+  { "slug": "members:write", "name": "Manage shelter members" }
+]
