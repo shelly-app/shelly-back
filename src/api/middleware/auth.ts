@@ -85,7 +85,14 @@ export async function authMiddleware(
     req.user = user;
 
     next();
-  } catch (_err) {
+  } catch (err) {
+    // Surface the actual reason (token expired, issuer/audience mismatch,
+    // missing claims, etc.) in the server logs; the client still gets a
+    // generic message so we don't leak verification details.
+    console.error(
+      "Auth verification failed:",
+      err instanceof Error ? err.message : err,
+    );
     res.status(StatusCodes.UNAUTHORIZED).json({ error: "Invalid token" });
   }
 }
