@@ -8,6 +8,7 @@ import {
   dbPassword,
   dbPort,
   dbSeeding,
+  dbSsl,
   dbUser,
 } from "@/env";
 
@@ -17,6 +18,9 @@ export const connection = new pg.Pool({
   host: dbHost,
   port: dbPort,
   database: dbName,
+  // RDS enforces TLS (rds.force_ssl). rejectUnauthorized:false accepts RDS's
+  // cert without bundling the RDS CA; set DB_SSL=false for a local plaintext db.
+  ssl: dbSsl ? { rejectUnauthorized: false } : false,
   max: dbMigrating || dbSeeding ? 1 : undefined,
 });
 
