@@ -16,6 +16,15 @@ const envSchema = z.object({
     .optional()
     .transform((val) => val?.split(",")),
   DB_SSL: z.stringbool().default(true),
+  CORS_ORIGINS: z
+    .string()
+    .optional()
+    .transform((val) =>
+      val
+        ?.split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean),
+    ),
   COGNITO_USER_POOL_ID: z.string(),
   COGNITO_CLIENT_ID: z.string(),
 });
@@ -37,6 +46,7 @@ export const {
   DB_SEEDING: dbSeeding,
   SEED_ADMIN_EMAILS: seedAdminEmails,
   DB_SSL: dbSsl,
+  CORS_ORIGINS: corsOrigins,
   COGNITO_USER_POOL_ID: cognitoUserPoolId,
   COGNITO_CLIENT_ID: cognitoClientId,
 } = env;

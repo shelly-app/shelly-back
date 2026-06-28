@@ -193,15 +193,20 @@ describe("pets/services", () => {
           id: 1,
           code: "DHPP",
           name: "Distemper, Hepatitis, Parvo, Parainfluenza",
+          specie: "dog",
         },
-        { id: 2, code: "RABIES", name: "Rabies" },
+        { id: 2, code: "RABIES", name: "Rabies", specie: "dog" },
       ]);
 
       const result = await services.findAllVaccines();
 
       expect(result).toEqual([
-        { code: "DHPP", name: "Distemper, Hepatitis, Parvo, Parainfluenza" },
-        { code: "RABIES", name: "Rabies" },
+        {
+          code: "DHPP",
+          name: "Distemper, Hepatitis, Parvo, Parainfluenza",
+          specie: "dog",
+        },
+        { code: "RABIES", name: "Rabies", specie: "dog" },
       ]);
     });
   });

@@ -86,8 +86,10 @@ describe("shelters/services", () => {
           events: [
             {
               id: 1,
+              type: "status_change",
               name: "Status change",
               description: "Status changed from pending to in_shelter",
+              metadata: { from: "pending", to: "in_shelter" },
               createdAt: new Date("2023-01-02"),
             },
           ],
@@ -121,8 +123,10 @@ describe("shelters/services", () => {
         events: [
           {
             id: 1,
+            type: "status_change",
             name: "Status change",
             description: "Status changed from pending to in_shelter",
+            metadata: { from: "pending", to: "in_shelter" },
             createdAt: "2023-01-02T00:00:00.000Z",
           },
         ],

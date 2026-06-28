@@ -253,7 +253,7 @@ describe("shelters/pets/services", () => {
         userId: 1,
         type: "status_change",
         name: "Status change",
-        description: "Status changed from in_shelter to adopted",
+        metadata: { from: "in_shelter", to: "adopted" },
       });
     });
 
@@ -282,7 +282,7 @@ describe("shelters/pets/services", () => {
         userId: 1,
         type: "name_change",
         name: "Name change",
-        description: 'Name changed from "Buddy" to "Max"',
+        metadata: { from: "Buddy", to: "Max" },
       });
     });
 
@@ -311,7 +311,7 @@ describe("shelters/pets/services", () => {
         userId: 1,
         type: "size_change",
         name: "Size change",
-        description: "Size changed from large to medium",
+        metadata: { from: "large", to: "medium" },
       });
     });
 

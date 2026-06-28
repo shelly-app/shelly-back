@@ -5,6 +5,7 @@ import type {
   petResponseSchema,
 } from "@/api/pets/schemas";
 import * as repository from "@/api/shelters/pets/repository";
+import { toDateOnly } from "@/api/utils";
 import { db } from "@/db";
 import {
   type ColorValue,
@@ -21,6 +22,43 @@ const validColors = colorEnum.enumValues as readonly ColorValue[];
 const validSpecies = specieEnum.enumValues as readonly SpecieValue[];
 const validStatuses = statusEnum.enumValues as readonly StatusValue[];
 
+/**
+ * Resolves vaccine codes to their database ids, throwing a validation error
+ * when any code is unknown. Returns a map of code -> vaccineId.
+ */
+async function resolveVaccineIds(
+  codes: string[],
+): Promise<Map<string, number>> {
+  const unique = [...new Set(codes)];
+  const resolved = await Promise.all(
+    unique.map((code) => repository.findVaccineByCode(code)),
+  );
+
+  const ids = new Map<string, number>();
+  const invalid: string[] = [];
+
+  unique.forEach((code, i) => {
+    const vaccine = resolved[i];
+    if (vaccine) {
+      ids.set(code, vaccine.id);
+    } else {
+      invalid.push(code);
+    }
+  });
+
+  if (invalid.length > 0) {
+    throw new ZodError([
+      {
+        code: "custom",
+        path: ["vaccines"],
+        message: `Invalid vaccine codes: ${invalid.join(", ")}`,
+      },
+    ]);
+  }
+
+  return ids;
+}
+
 export async function findShelterPetDetailed(shelterId: number, petId: number) {
   const result = await repository.findById(petId, shelterId);
 
@@ -29,23 +67,26 @@ export async function findShelterPetDetailed(shelterId: number, petId: number) {
   const response: z.infer<typeof detailedPetResponseSchema> = {
     id: result.id,
     name: result.name,
-    birthDate: result.birthDate,
+    birthDate: toDateOnly(result.birthDate),
     breed: result.breed,
     specie: result.specie as SpecieValue,
     sex: result.sex as SexValue,
-    size: result.size as SizeValue,
+    size: result.size as SizeValue | null,
     status: result.status as StatusValue,
     description: result.description,
     colors: (result.colors ?? []) as string[],
     shelter: { name: result.shelter.name, city: result.shelter.city },
     vaccinations: result.vaccinations.map((v) => ({
       vaccine: v.vaccine.name,
+      vaccineCode: v.vaccine.code,
       administeredAt: v.administeredAt.toISOString(),
     })),
     events: result.events.map((e) => ({
       id: e.id,
+      type: e.type,
       name: e.name,
       description: e.description,
+      metadata: e.metadata ?? null,
       createdAt: e.createdAt.toISOString(),
     })),
   };
@@ -59,12 +100,13 @@ export async function registerPet(
     name: string;
     breed?: string | null;
     sex: "male" | "female";
-    size: "small" | "medium" | "large";
+    size?: "small" | "medium" | "large";
     status?: string;
     specie?: string;
     birthDate?: string;
     description?: string | null;
     colors?: string[];
+    vaccines?: string[];
   },
 ) {
   const shelterRecord = await repository.findShelterById(shelterId);
@@ -110,11 +152,19 @@ export async function registerPet(
     petColors = body.colors as ColorValue[];
   }
 
+  // Resolve vaccine codes up-front so an invalid code fails before the pet is
+  // created (the repository helpers share the global connection, so this is not
+  // a true transaction).
+  const vaccineIds =
+    body.vaccines && body.vaccines.length > 0
+      ? [...(await resolveVaccineIds(body.vaccines)).values()]
+      : [];
+
   const newPet = await repository.createPet({
     name: body.name,
     breed: body.breed,
     sex: body.sex as SexValue,
-    size: body.size as SizeValue,
+    size: body.size as SizeValue | undefined,
     specie: body.specie as SpecieValue,
     colors: petColors,
     status: body.status as StatusValue,
@@ -123,13 +173,17 @@ export async function registerPet(
     birthDate: body.birthDate,
   });
 
+  for (const vaccineId of vaccineIds) {
+    await repository.createVaccinationRecord({ petId: newPet.id, vaccineId });
+  }
+
   const response: z.infer<typeof petResponseSchema> = {
     id: newPet.id,
     name: newPet.name,
-    birthDate: newPet.birthDate,
+    birthDate: toDateOnly(newPet.birthDate),
     breed: newPet.breed,
     sex: newPet.sex as SexValue,
-    size: newPet.size as SizeValue,
+    size: newPet.size as SizeValue | null,
     description: newPet.description,
     specie: newPet.specie as SpecieValue,
     status: newPet.status as StatusValue,
@@ -155,6 +209,7 @@ export async function updatePet(
     status?: string;
     specie?: string;
     colors?: string[];
+    vaccines?: string[];
   },
 ) {
   const existing = await repository.findById(petId, shelterId);
@@ -241,8 +296,31 @@ export async function updatePet(
     updateData.description = body.description ?? undefined;
   }
 
+  // Resolve desired vaccines before mutating so invalid codes fail early.
+  const desiredVaccineIds =
+    body.vaccines !== undefined
+      ? [...(await resolveVaccineIds(body.vaccines)).values()]
+      : undefined;
+
   const updatedPet = await db.transaction(async (_tx) => {
     let petRow = existing;
+
+    if (desiredVaccineIds !== undefined) {
+      const existingVaccineIds = existing.vaccinations.map((v) => v.vaccineId);
+      const toAdd = desiredVaccineIds.filter(
+        (id) => !existingVaccineIds.includes(id),
+      );
+      const toRemove = existingVaccineIds.filter(
+        (id) => !desiredVaccineIds.includes(id),
+      );
+
+      for (const vaccineId of toAdd) {
+        await repository.createVaccinationRecord({ petId, vaccineId });
+      }
+      for (const vaccineId of toRemove) {
+        await repository.deleteVaccinationRecord(petId, vaccineId);
+      }
+    }
 
     if (Object.keys(updateData).length > 0) {
       const res = await repository.updatePet(petId, updateData);
@@ -256,7 +334,7 @@ export async function updatePet(
           userId,
           type: "status_change",
           name: "Status change",
-          description: `Status changed from ${existing.status} to ${body.status}`,
+          metadata: { from: existing.status, to: body.status },
         });
       }
       if (body.name !== undefined && body.name !== existing.name) {
@@ -265,7 +343,7 @@ export async function updatePet(
           userId,
           type: "name_change",
           name: "Name change",
-          description: `Name changed from "${existing.name}" to "${body.name}"`,
+          metadata: { from: existing.name, to: body.name },
         });
       }
       if (body.size !== undefined && body.size !== existing.size) {
@@ -274,7 +352,7 @@ export async function updatePet(
           userId,
           type: "size_change",
           name: "Size change",
-          description: `Size changed from ${existing.size} to ${body.size}`,
+          metadata: { from: existing.size, to: body.size },
         });
       }
     }
@@ -285,10 +363,10 @@ export async function updatePet(
   const response: z.infer<typeof petResponseSchema> = {
     id: updatedPet.id,
     name: updatedPet.name,
-    birthDate: updatedPet.birthDate,
+    birthDate: toDateOnly(updatedPet.birthDate),
     breed: updatedPet.breed,
     sex: updatedPet.sex,
-    size: updatedPet.size,
+    size: updatedPet.size as SizeValue | null,
     description: updatedPet.description,
     specie: updatedPet.specie as SpecieValue,
     status: updatedPet.status as StatusValue,

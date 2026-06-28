@@ -11,7 +11,7 @@ CREATE TABLE "pets" (
 	"specie" "specie" NOT NULL,
 	"sex" "sex" NOT NULL,
 	"size" "size" NOT NULL,
-	"colors" text,
+	"colors" text[],
 	"status" "status" NOT NULL,
 	"description" text,
 	"shelter_id" integer NOT NULL,

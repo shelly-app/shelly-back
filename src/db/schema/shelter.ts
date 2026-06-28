@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import { pgTable, serial, varchar } from "drizzle-orm/pg-core";
+import { adoptionRequests } from "@/db/schema/adoption-requests";
 import { timestamps } from "@/db/schema/helpers/timestamps";
 import { shelterMembers } from "@/db/schema/shelter-members";
 
@@ -16,6 +17,7 @@ export const shelter = pgTable("shelters", {
 
 export const shelterRelations = relations(shelter, ({ many }) => ({
   members: many(shelterMembers),
+  adoptionRequests: many(adoptionRequests),
 }));
 
 export type Shelter = typeof shelter.$inferSelect;

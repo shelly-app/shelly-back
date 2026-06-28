@@ -1,6 +1,7 @@
 import { apiReference } from "@scalar/express-api-reference";
 import { Router } from "express";
 import { createDocument } from "zod-openapi";
+import { contactPaths } from "@/api/contact/routes";
 import { petsPaths } from "@/api/pets/routes";
 import { sheltersPaths } from "@/api/shelters/routes";
 import { usersPaths } from "@/api/users/routes";
@@ -25,6 +26,7 @@ const openApiDocument = createDocument({
     ...usersPaths,
     ...sheltersPaths,
     ...petsPaths,
+    ...contactPaths,
   },
 });
 

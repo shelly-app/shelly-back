@@ -55,7 +55,7 @@
         },
         "colors": {
           "name": "colors",
-          "type": "text",
+          "type": "text[]",
           "primaryKey": false,
           "notNull": false
         },

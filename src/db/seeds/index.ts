@@ -1,3 +1,4 @@
+export { seedAdoptionRequests } from "./adoption-requests";
 export { seedMembers } from "./members";
 export { seedPermissions } from "./permissions";
 export { seedPets } from "./pet";

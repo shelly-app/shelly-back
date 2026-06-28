@@ -5,5 +5,7 @@
   { "slug": "vaccinations:write", "name": "Manage vaccinations" },
   { "slug": "events:write", "name": "Manage events" },
   { "slug": "members:read", "name": "Read shelter members" },
-  { "slug": "members:write", "name": "Manage shelter members" }
+  { "slug": "members:write", "name": "Manage shelter members" },
+  { "slug": "requests:read", "name": "Read adoption requests" },
+  { "slug": "requests:write", "name": "Manage adoption requests" }
 ]

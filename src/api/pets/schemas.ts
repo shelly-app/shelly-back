@@ -1,6 +1,13 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { pet, sexEnum, sizeEnum, specieEnum, statusEnum } from "@/db/schema";
+import {
+  eventTypeEnum,
+  pet,
+  sexEnum,
+  sizeEnum,
+  specieEnum,
+  statusEnum,
+} from "@/db/schema";
 
 export const petIdParamsSchema = z.object({
   id: z.coerce
@@ -23,7 +30,7 @@ export const petResponseSchema = petSelectSchema
     birthDate: z.iso.date().nullable(),
     specie: z.enum(specieEnum.enumValues),
     sex: z.enum(sexEnum.enumValues),
-    size: z.enum(sizeEnum.enumValues),
+    size: z.enum(sizeEnum.enumValues).nullable(),
     status: z.enum(statusEnum.enumValues),
     colors: z.array(z.string()),
     shelter: z.object({
@@ -37,6 +44,7 @@ export const detailedPetResponseSchema = petResponseSchema.extend({
     .array(
       z.object({
         vaccine: z.string(),
+        vaccineCode: z.string(),
         administeredAt: z.string(),
       }),
     )
@@ -45,8 +53,15 @@ export const detailedPetResponseSchema = petResponseSchema.extend({
     .array(
       z.object({
         id: z.number().int().positive(),
+        type: z.enum(eventTypeEnum.enumValues),
         name: z.string(),
         description: z.string().nullable(),
+        metadata: z
+          .object({
+            from: z.string().nullish(),
+            to: z.string().nullish(),
+          })
+          .nullable(),
         createdAt: z.string(),
       }),
     )

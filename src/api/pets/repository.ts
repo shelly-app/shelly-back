@@ -22,23 +22,23 @@ export async function findByIdPublic(id: number) {
 
 export async function findAllColors() {
   const result = await db.execute(
-    sql`SELECT enum_label as color FROM pg_enum WHERE enumtypid = (SELECT oid FROM pg_type WHERE typname = 'color')`,
+    sql`SELECT enumlabel AS color FROM pg_enum WHERE enumtypid = (SELECT oid FROM pg_type WHERE typname = 'color') ORDER BY enumsortorder`,
   );
-  return result as unknown as { color: string }[];
+  return result.rows as { color: string }[];
 }
 
 export async function findAllSpecies() {
   const result = await db.execute(
-    sql`SELECT enum_label as specie FROM pg_enum WHERE enumtypid = (SELECT oid FROM pg_type WHERE typname = 'specie')`,
+    sql`SELECT enumlabel AS specie FROM pg_enum WHERE enumtypid = (SELECT oid FROM pg_type WHERE typname = 'specie') ORDER BY enumsortorder`,
   );
-  return result as unknown as { specie: string }[];
+  return result.rows as { specie: string }[];
 }
 
 export async function findAllStatuses() {
   const result = await db.execute(
-    sql`SELECT enum_label as status FROM pg_enum WHERE enumtypid = (SELECT oid FROM pg_type WHERE typname = 'status')`,
+    sql`SELECT enumlabel AS status FROM pg_enum WHERE enumtypid = (SELECT oid FROM pg_type WHERE typname = 'status') ORDER BY enumsortorder`,
   );
-  return result as unknown as { status: string }[];
+  return result.rows as { status: string }[];
 }
 
 export async function findAllVaccines() {
