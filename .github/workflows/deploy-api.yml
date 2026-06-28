@@ -47,34 +47,45 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Write the private deploy key
+          echo "==> Writing deploy key"
           install -m 700 -d ~/.ssh
           printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
-          # Pin the host key so the connection isn't subject to an interactive prompt
-          ssh-keyscan -p "$EC2_SSH_PORT" "$EC2_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          echo "==> Scanning host key for $EC2_HOST:$EC2_SSH_PORT"
+          # Pin the host key so the connection isn't subject to an interactive
+          # prompt. stderr is kept (not sent to /dev/null) so connectivity
+          # problems are visible; an empty result means the host is unreachable.
+          if ! ssh-keyscan -T 10 -p "$EC2_SSH_PORT" "$EC2_HOST" >> ~/.ssh/known_hosts; then
+            echo "::error::ssh-keyscan failed — host unreachable on port $EC2_SSH_PORT (check EC2_HOST, EC2_SSH_PORT, and the security group's SSH ingress)."
+            exit 1
+          fi
 
-          ssh_opts="-i $HOME/.ssh/deploy_key -p $EC2_SSH_PORT"
+          # Fail fast and never prompt: BatchMode disables interactive auth,
+          # ConnectTimeout bounds the wait so a closed SG doesn't hang the job.
+          ssh_opts="-i $HOME/.ssh/deploy_key -p $EC2_SSH_PORT -o BatchMode=yes -o ConnectTimeout=15"
 
           # Materialise the production .env from the secret (file transfer, so
           # its contents are never interpolated into a shell command).
           printf '%s\n' "$PROD_ENV" > prod.env
 
-          # Ship the build artifact and the env file
-          scp -i "$HOME/.ssh/deploy_key" -P "$EC2_SSH_PORT" \
+          echo "==> Copying artifact + env to the instance (scp)"
+          scp -o BatchMode=yes -o ConnectTimeout=15 -i "$HOME/.ssh/deploy_key" -P "$EC2_SSH_PORT" \
             deploy.tar.gz prod.env "$EC2_USER@$EC2_HOST:/tmp/"
 
-          # Run the remote deployment. APP_DIR is injected from the secret; the
-          # quoted heredoc keeps the rest of the script from expanding locally.
+          echo "==> Running remote deployment (ssh)"
+          # APP_DIR is injected from the secret; the quoted heredoc keeps the
+          # rest of the script from expanding locally.
           ssh $ssh_opts "$EC2_USER@$EC2_HOST" "APP_DIR='$EC2_APP_DIR' bash -s" <<'REMOTE'
           set -euo pipefail
 
+          echo "==> [remote] Extracting artifact"
           rm -rf /tmp/deploy
           tar -xzf /tmp/deploy.tar.gz -C /tmp
 
           mkdir -p "$APP_DIR"
 
+          echo "==> [remote] Syncing into $APP_DIR"
           # Sync into the app dir. .env is excluded so --delete can't remove it,
           # then refreshed below from the uploaded secret. node_modules is
           # refreshed by the install below.
@@ -88,13 +99,21 @@ jobs:
           rm -rf /tmp/deploy /tmp/deploy.tar.gz /tmp/prod.env
 
           cd "$APP_DIR"
+
+          echo "==> [remote] Provisioning pnpm via corepack"
           # Corepack ships with Node and provisions the pnpm version pinned in
-          # package.json's "packageManager" field.
-          corepack enable
+          # package.json's "packageManager" field. When Node is installed
+          # system-wide, enabling the shims needs root, so fall back to sudo.
+          corepack enable 2>/dev/null || sudo corepack enable
           corepack prepare --activate
+
+          echo "==> [remote] Installing production dependencies"
           pnpm install --prod --frozen-lockfile
 
+          echo "==> [remote] Restarting service"
           # systemd owns the process; this picks up the new build.
           sudo systemctl restart shelly-api
+
+          echo "==> [remote] Done"
           REMOTE
 
