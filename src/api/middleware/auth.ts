@@ -16,9 +16,20 @@ const verifier = CognitoJwtVerifier.create({
 const cognitoPayloadSchema = z.object({
   sub: z.string(),
   email: z.email(),
-  given_name: z.string(),
-  family_name: z.string(),
+  // Federated providers don't always supply these (e.g. single-name Google
+  // accounts, or before attribute mapping is configured), so treat them as
+  // optional and derive a display name from whatever is available.
+  given_name: z.string().optional(),
+  family_name: z.string().optional(),
+  name: z.string().optional(),
 });
+
+const resolveDisplayName = (
+  payload: z.infer<typeof cognitoPayloadSchema>,
+): string =>
+  payload.name?.trim() ||
+  [payload.given_name, payload.family_name].filter(Boolean).join(" ").trim() ||
+  payload.email;
 
 export async function authMiddleware(
   req: Request,
@@ -45,6 +56,7 @@ export async function authMiddleware(
     const payload = await verifier.verify(token);
 
     const parsedPayload = cognitoPayloadSchema.parse(payload);
+    const displayName = resolveDisplayName(parsedPayload);
 
     let user = await db.query.users.findFirst({
       where: eq(users.cognitoSub, parsedPayload.sub),
@@ -60,7 +72,7 @@ export async function authMiddleware(
           .update(users)
           .set({
             cognitoSub: parsedPayload.sub,
-            name: `${parsedPayload.given_name} ${parsedPayload.family_name}`,
+            name: displayName,
           })
           .where(eq(users.id, existing.id))
           .returning();
@@ -70,7 +82,7 @@ export async function authMiddleware(
           .insert(users)
           .values({
             email: parsedPayload.email,
-            name: `${parsedPayload.given_name} ${parsedPayload.family_name}`,
+            name: displayName,
             cognitoSub: parsedPayload.sub,
           })
           .returning();
