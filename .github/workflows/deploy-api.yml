@@ -102,13 +102,17 @@ jobs:
 
           echo "==> [remote] Provisioning pnpm via corepack"
           # Corepack ships with Node and provisions the pnpm version pinned in
-          # package.json's "packageManager" field. When Node is installed
-          # system-wide, enabling the shims needs root, so fall back to sudo.
-          corepack enable 2>/dev/null || sudo corepack enable
+          # package.json's "packageManager" field. Enabling the global shims is
+          # best-effort: it can hit EACCES on a system-wide Node install, but
+          # `prepare --activate` is what actually makes the pinned pnpm usable.
+          corepack enable 2>/dev/null || sudo corepack enable 2>/dev/null || true
           corepack prepare --activate
 
           echo "==> [remote] Installing production dependencies"
-          pnpm install --prod --frozen-lockfile
+          # --ignore-scripts skips the root "prepare" (husky) lifecycle: husky is
+          # a devDependency that isn't present under --prod, and git hooks are
+          # irrelevant on the deploy host. None of the prod deps need postinstall.
+          pnpm install --prod --frozen-lockfile --ignore-scripts
 
           echo "==> [remote] Restarting service"
           # systemd owns the process; this picks up the new build.
