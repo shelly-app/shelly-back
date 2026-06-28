@@ -1,15 +1,15 @@
 [
-  { "code": "RAB", "name": "Rabies", "specie": "dog" },
+  { "code": "RAB", "name": "Rabia", "specie": "dog" },
   {
     "code": "DHPP",
-    "name": "Distemper, adenovirus, parainfluenza, and parvovirus",
+    "name": "Moquillo, adenovirus, parainfluenza y parvovirus",
     "specie": "dog"
   },
   { "code": "BORD", "name": "Bordetella bronchiseptica", "specie": "dog" },
   {
     "code": "FVRCP",
-    "name": "Feline viral rhinotracheitis, calicivirus, and panleukopenia",
+    "name": "Rinotraqueítis viral felina, calicivirus y panleucopenia",
     "specie": "cat"
   },
-  { "code": "FeLV", "name": "Feline leukemia virus", "specie": "cat" }
+  { "code": "FeLV", "name": "Virus de la leucemia felina", "specie": "cat" }
 ]

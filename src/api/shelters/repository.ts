@@ -3,11 +3,7 @@ import { db } from "@/db";
 import { shelter } from "@/db/schema";
 
 export async function findAll() {
-  return db.query.shelter.findMany({
-    columns: {
-      id: false,
-    },
-  });
+  return db.query.shelter.findMany();
 }
 
 export async function findById(id: number) {

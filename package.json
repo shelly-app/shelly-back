@@ -31,6 +31,7 @@
   "dependencies": {
     "@scalar/express-api-reference": "0.8.28",
     "aws-jwt-verify": "5.1.1",
+    "cors": "2.8.6",
     "drizzle-orm": "0.45.1",
     "drizzle-zod": "0.8.3",
     "express": "5.2.1",

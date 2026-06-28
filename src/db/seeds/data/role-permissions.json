@@ -6,6 +6,9 @@
   { "roleName": "admin", "permissionSlug": "events:write" },
   { "roleName": "admin", "permissionSlug": "members:read" },
   { "roleName": "admin", "permissionSlug": "members:write" },
+  { "roleName": "admin", "permissionSlug": "requests:read" },
+  { "roleName": "admin", "permissionSlug": "requests:write" },
   { "roleName": "volunteer", "permissionSlug": "pets:read" },
-  { "roleName": "volunteer", "permissionSlug": "members:read" }
+  { "roleName": "volunteer", "permissionSlug": "members:read" },
+  { "roleName": "volunteer", "permissionSlug": "requests:read" }
 ]

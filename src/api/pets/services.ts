@@ -1,6 +1,7 @@
 import type { z } from "zod";
 import * as repository from "@/api/pets/repository";
 import type { petResponseSchema } from "@/api/pets/schemas";
+import { toDateOnly } from "@/api/utils";
 import type {
   SexValue,
   SizeValue,
@@ -15,11 +16,11 @@ export async function findAllPublicPets() {
     (p): z.infer<typeof petResponseSchema> => ({
       id: p.id,
       name: p.name,
-      birthDate: p.birthDate,
+      birthDate: toDateOnly(p.birthDate),
       breed: p.breed,
       specie: p.specie as SpecieValue,
       sex: p.sex as SexValue,
-      size: p.size as SizeValue,
+      size: p.size as SizeValue | null,
       status: p.status as StatusValue,
       description: p.description,
       colors: (p.colors ?? []) as string[],
@@ -36,11 +37,11 @@ export async function findPublicPetById(id: number) {
   const response: z.infer<typeof petResponseSchema> = {
     id: pet.id,
     name: pet.name,
-    birthDate: pet.birthDate,
+    birthDate: toDateOnly(pet.birthDate),
     breed: pet.breed,
     specie: pet.specie as SpecieValue,
     sex: pet.sex as SexValue,
-    size: pet.size as SizeValue,
+    size: pet.size as SizeValue | null,
     status: pet.status as StatusValue,
     description: pet.description,
     colors: (pet.colors ?? []) as string[],
@@ -71,5 +72,6 @@ export async function findAllVaccines() {
   return vaccines.map((v) => ({
     code: v.code,
     name: v.name,
+    specie: v.specie,
   }));
 }

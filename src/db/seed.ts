@@ -16,6 +16,8 @@ async function resetTable(db: db, table: Table) {
 
 async function runSeeds() {
   for (const table of [
+    schema.adoptionRequests,
+    schema.contactSubmissions,
     schema.shelterMembers,
     schema.events,
     schema.vaccinations,
@@ -31,11 +33,14 @@ async function runSeeds() {
 
   await seeds.seedVaccines(db);
   await seeds.seedShelter(db);
-  await seeds.seedPets(db);
+  // Roles and members must be seeded before pets: pet events reference a user,
+  // so at least one user has to exist before `seedPets` runs.
   await seeds.seedRoles(db);
   await seeds.seedPermissions(db);
   await seeds.seedRolePermissions(db);
   await seeds.seedMembers(db);
+  await seeds.seedPets(db);
+  await seeds.seedAdoptionRequests(db);
 
   await connection.end();
 }

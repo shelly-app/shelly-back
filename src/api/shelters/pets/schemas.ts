@@ -28,8 +28,15 @@ export const registerPetBodySchema = petInsertSchema
     status: z.enum(statusEnum.enumValues),
     specie: z.enum(specieEnum.enumValues),
     sex: z.enum(sexEnum.enumValues),
-    size: z.enum(sizeEnum.enumValues),
-    breed: z.string().trim().min(1).optional(),
+    size: z.preprocess(
+      (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+      z.enum(sizeEnum.enumValues).optional(),
+    ),
+    breed: z.preprocess(
+      (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+      z.string().trim().min(1).optional(),
+    ),
+    vaccines: z.array(z.string()).optional(),
   });
 
 export const updatePetBodySchema = registerPetBodySchema.partial();

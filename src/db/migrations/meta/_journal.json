@@ -6,14 +6,49 @@
       "idx": 0,
       "version": "7",
       "when": 1777673483838,
-      "tag": "0000_famous_grim_reaper",
+      "tag": "20260501221123_init_schema",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
       "when": 1777675425470,
-      "tag": "0001_keen_proteus",
+      "tag": "20260501224345_add_event_type_and_user_to_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782585437882,
+      "tag": "20260627183717_add_adoption_requests_and_contact_submissions",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1782601787678,
+      "tag": "20260627230947_add_specie_to_vaccines",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782606217723,
+      "tag": "20260628002337_make_pet_size_optional",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1782608627316,
+      "tag": "20260628010347_add_metadata_to_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782655992204,
+      "tag": "20260628141312_add_common_pet_colors",
       "breakpoints": true
     }
   ]

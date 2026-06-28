@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import type {
   ColorValue,
+  EventMetadata,
   SexValue,
   SizeValue,
   SpecieValue,
@@ -16,7 +17,9 @@ export async function findById(petId: number, shelterId: number) {
     with: {
       shelter: true,
       vaccinations: { with: { vaccine: true } },
-      events: true,
+      events: {
+        orderBy: (e, { desc }) => [desc(e.createdAt)],
+      },
     },
   });
 }
@@ -37,7 +40,7 @@ type CreatePetInput = {
   name: string;
   breed?: string | null;
   sex: SexValue;
-  size: SizeValue;
+  size?: SizeValue;
   colors?: ColorValue[] | null;
   status: StatusValue;
   specie: SpecieValue;
@@ -87,6 +90,17 @@ export async function createVaccinationRecord(values: {
   return result;
 }
 
+export async function deleteVaccinationRecord(
+  petId: number,
+  vaccineId: number,
+) {
+  await db
+    .delete(vaccinations)
+    .where(
+      and(eq(vaccinations.petId, petId), eq(vaccinations.vaccineId, vaccineId)),
+    );
+}
+
 export async function createEventRecord(values: {
   petId: number;
   userId: number;
@@ -98,6 +112,7 @@ export async function createEventRecord(values: {
     | "size_change";
   name: string;
   description?: string;
+  metadata?: EventMetadata;
 }) {
   const [result] = await db.insert(events).values(values).returning();
   if (!result) throw new Error("Failed to create event");

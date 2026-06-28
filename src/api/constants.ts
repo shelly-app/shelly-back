@@ -16,4 +16,6 @@ export const Permissions = {
   EVENTS_WRITE: "events:write",
   MEMBERS_READ: "members:read",
   MEMBERS_WRITE: "members:write",
+  REQUESTS_READ: "requests:read",
+  REQUESTS_WRITE: "requests:write",
 } as const;

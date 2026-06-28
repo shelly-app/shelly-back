@@ -21,7 +21,35 @@ export async function seedPets(db: db) {
 
   const shelterMap = new Map(allShelters.map((s) => [s.name, s.id]));
   const vaccinesMap = new Map(allVaccines.map((v) => [v.code, v.id]));
-  const defaultUserId = allUsers[0]?.id ?? 1;
+
+  // Pet events require a valid user. Prefer an existing (e.g. seeded admin)
+  // user, otherwise fall back to a dedicated system user so seeding works even
+  // when `SEED_ADMIN_EMAILS` is not configured.
+  let defaultUserId = allUsers[0]?.id;
+
+  if (!defaultUserId) {
+    const [systemUser] = await db
+      .insert(users)
+      .values({
+        email: "system@shelly.local",
+        name: "System",
+        cognitoSub: "system",
+      })
+      .onConflictDoNothing()
+      .returning();
+
+    defaultUserId =
+      systemUser?.id ??
+      (
+        await db.query.users.findFirst({
+          where: (u, { eq }) => eq(u.email, "system@shelly.local"),
+        })
+      )?.id;
+  }
+
+  if (!defaultUserId) {
+    throw new Error("Failed to resolve a user to attribute pet events to");
+  }
 
   for (const p of petsData) {
     const shelterId = shelterMap.get(p.shelter);
