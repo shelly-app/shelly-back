@@ -34,6 +34,10 @@ jobs:
           mkdir deploy
           cp package.json pnpm-lock.yaml deploy/
           cp -R dist deploy/
+          # Ship the migration SQL + journal. migrate.ts resolves the folder as
+          # "./src/db/migrations" relative to the run dir, so preserve that path.
+          mkdir -p deploy/src/db
+          cp -R src/db/migrations deploy/src/db/
           tar -czf deploy.tar.gz deploy
 
       - name: Deploy to EC2
@@ -113,6 +117,15 @@ jobs:
           # a devDependency that isn't present under --prod, and git hooks are
           # irrelevant on the deploy host. None of the prod deps need postinstall.
           pnpm install --prod --frozen-lockfile --ignore-scripts
+
+          echo "==> [remote] Applying database migrations"
+          # Run the compiled migrator (drizzle-orm is a prod dep) against the SQL
+          # shipped to ./src/db/migrations. Drizzle only applies migrations not
+          # already in its journal, so this is a no-op when nothing is new.
+          # DB_MIGRATING satisfies the guard in migrate.ts; running before the
+          # restart means a failed migration aborts the deploy and leaves the
+          # current service untouched.
+          DB_MIGRATING=true node --require module-alias/register --env-file=.env dist/db/migrate.js
 
           echo "==> [remote] Restarting service"
           # systemd owns the process; this picks up the new build.
