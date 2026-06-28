@@ -14,21 +14,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Version is read from package.json's "packageManager" field.
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: pnpm
 
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
 
-      - run: npm test
+      - run: pnpm test
 
-      - run: npm run build
+      - run: pnpm build
 
       - name: Package build artifact
         run: |
           mkdir deploy
-          cp package.json package-lock.json deploy/
+          cp package.json pnpm-lock.yaml deploy/
           cp -R dist deploy/
           tar -czf deploy.tar.gz deploy
 
@@ -73,7 +76,7 @@ jobs:
 
           # Sync into the app dir. .env is excluded so --delete can't remove it,
           # then refreshed below from the uploaded secret. node_modules is
-          # refreshed by npm ci.
+          # refreshed by the install below.
           rsync -a --delete \
             --exclude='.env' \
             --exclude='node_modules' \
@@ -84,7 +87,11 @@ jobs:
           rm -rf /tmp/deploy /tmp/deploy.tar.gz /tmp/prod.env
 
           cd "$APP_DIR"
-          npm ci --omit=dev
+          # Corepack ships with Node and provisions the pnpm version pinned in
+          # package.json's "packageManager" field.
+          corepack enable
+          corepack prepare --activate
+          pnpm install --prod --frozen-lockfile
 
           # systemd owns the process; this picks up the new build.
           sudo systemctl restart shelly-api
