@@ -3,8 +3,10 @@ import { db } from "@/db";
 
 export async function findAllPublic() {
   return db.query.pet.findMany({
-    where: (p, { and, eq, isNull }) =>
-      and(isNull(p.deletedAt), eq(p.status, "in_shelter")),
+    // Adopters can request any pet still open for adoption ("in_shelter" or
+    // "in_foster"); "adopted" (already placed) and "deceased" are excluded.
+    where: (p, { and, isNull, inArray }) =>
+      and(isNull(p.deletedAt), inArray(p.status, ["in_shelter", "in_foster"])),
     with: {
       shelter: true,
     },
