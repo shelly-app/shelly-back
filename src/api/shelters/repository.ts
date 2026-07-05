@@ -16,11 +16,7 @@ export async function findPets(shelterId: number) {
     // Adopter-facing list: only pets still open for adoption ("in_shelter" or
     // "in_foster"); "adopted" (already placed) and "deceased" are excluded.
     where: (p, { and, eq, isNull, inArray }) =>
-      and(
-        isNull(p.deletedAt),
-        eq(p.shelterId, shelterId),
-        inArray(p.status, ["in_shelter", "in_foster"]),
-      ),
+      and(isNull(p.deletedAt), eq(p.shelterId, shelterId)),
     with: {
       shelter: true,
       vaccinations: { with: { vaccine: true } },
