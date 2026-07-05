@@ -116,7 +116,9 @@ jobs:
           # --ignore-scripts skips the root "prepare" (husky) lifecycle: husky is
           # a devDependency that isn't present under --prod, and git hooks are
           # irrelevant on the deploy host. None of the prod deps need postinstall.
-          pnpm install --prod --frozen-lockfile --ignore-scripts
+          # CI=true lets pnpm purge the previous deploy's node_modules (excluded
+          # from the rsync above) without an interactive TTY confirmation.
+          CI=true pnpm install --prod --frozen-lockfile --ignore-scripts
 
           echo "==> [remote] Applying database migrations"
           # Run the compiled migrator (drizzle-orm is a prod dep) against the SQL
