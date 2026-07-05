@@ -8,6 +8,16 @@ vi.mock("@/api/shelters/adoption-requests/repository", () => ({
   findPetInShelter: vi.fn().mockResolvedValue(undefined),
   create: vi.fn().mockResolvedValue(undefined),
   updateStatus: vi.fn().mockResolvedValue(undefined),
+  updatePetStatus: vi.fn().mockResolvedValue(undefined),
+  rejectOtherPendingForPet: vi.fn().mockResolvedValue([]),
+}));
+
+// The approve path wraps its writes in `db.transaction`; run the callback
+// immediately with a stub tx handle so the mocked repository is exercised.
+vi.mock("@/db", () => ({
+  db: {
+    transaction: vi.fn(async (cb: (tx: unknown) => unknown) => cb({})),
+  },
 }));
 
 type Row = Awaited<ReturnType<typeof repository.findById>>;
@@ -157,6 +167,36 @@ describe("shelters/adoption-requests/services", () => {
       expect(call?.approvedAt).toBeTruthy();
       expect(call?.rejectedAt).toBeNull();
       expect(result.data?.status).toBe("approved");
+    });
+
+    it("marks the pet adopted and auto-rejects other pending requests on approve", async () => {
+      vi.mocked(repository.findById).mockResolvedValue(
+        baseRow as unknown as Row,
+      );
+      vi.mocked(repository.updateStatus).mockImplementation(
+        async (_id, data) =>
+          ({
+            ...baseRow,
+            ...data,
+          }) as unknown as Awaited<ReturnType<typeof repository.updateStatus>>,
+      );
+
+      await services.updateAdoptionRequestStatus(5, 1, "approved");
+
+      expect(repository.updatePetStatus).toHaveBeenCalledWith(
+        baseRow.petId,
+        "adopted",
+        expect.anything(),
+      );
+
+      const rejectCall = vi.mocked(repository.rejectOtherPendingForPet).mock
+        .calls[0];
+      expect(rejectCall?.[0]).toBe(baseRow.petId);
+      expect(rejectCall?.[1]).toBe(1);
+      expect(rejectCall?.[2].rejectionReason).toBe(
+        "app.requests.rejection_reasons.pet_adopted",
+      );
+      expect(rejectCall?.[2].rejectedAt).toBeTruthy();
     });
 
     it("stores the rejection reason on reject", async () => {

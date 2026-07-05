@@ -1,6 +1,15 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull, ne } from "drizzle-orm";
 import { db } from "@/db";
-import { type AdoptionRequestStatusValue, adoptionRequests } from "@/db/schema";
+import {
+  type AdoptionRequestStatusValue,
+  adoptionRequests,
+  pet,
+  type StatusValue,
+} from "@/db/schema";
+
+// Either the pooled db or a transaction handle, so callers can run these
+// helpers atomically inside a `db.transaction` block.
+type Executor = typeof db | Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 export async function findByShelterId(
   shelterId: number,
@@ -66,11 +75,55 @@ type UpdateStatusInput = {
   updatedAt: string;
 };
 
-export async function updateStatus(requestId: number, data: UpdateStatusInput) {
-  const [updated] = await db
+export async function updateStatus(
+  requestId: number,
+  data: UpdateStatusInput,
+  executor: Executor = db,
+) {
+  const [updated] = await executor
     .update(adoptionRequests)
     .set(data)
     .where(eq(adoptionRequests.id, requestId))
+    .returning();
+  return updated;
+}
+
+type RejectPendingInput = {
+  rejectionReason: string;
+  rejectedAt: string;
+  updatedAt: string;
+};
+
+// Rejects every still-pending request for a pet except the one being approved.
+export async function rejectOtherPendingForPet(
+  petId: number,
+  approvedRequestId: number,
+  data: RejectPendingInput,
+  executor: Executor = db,
+) {
+  return executor
+    .update(adoptionRequests)
+    .set({ status: "rejected", ...data })
+    .where(
+      and(
+        isNull(adoptionRequests.deletedAt),
+        eq(adoptionRequests.petId, petId),
+        eq(adoptionRequests.status, "pending"),
+        ne(adoptionRequests.id, approvedRequestId),
+      ),
+    )
+    .returning();
+}
+
+export async function updatePetStatus(
+  petId: number,
+  status: StatusValue,
+  executor: Executor = db,
+) {
+  const [updated] = await executor
+    .update(pet)
+    .set({ status })
+    .where(eq(pet.id, petId))
     .returning();
   return updated;
 }

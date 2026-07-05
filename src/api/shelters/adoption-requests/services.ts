@@ -1,7 +1,14 @@
 import type { z } from "zod";
 import * as repository from "@/api/shelters/adoption-requests/repository";
 import type { adoptionRequestResponseSchema } from "@/api/shelters/adoption-requests/schemas";
+import { db } from "@/db";
 import type { AdoptionRequest } from "@/db/schema";
+
+// Stored verbatim as the rejection reason of requests auto-rejected when a pet
+// is adopted. It's an i18n key (not prose) so the frontend renders it in the
+// viewer's language; see `app.requests.rejection_reasons` in the locale files.
+const PET_ADOPTED_REJECTION_REASON =
+  "app.requests.rejection_reasons.pet_adopted";
 
 type AdoptionRequestWithPet = AdoptionRequest & {
   pet: { id: number; name: string } | null;
@@ -93,12 +100,57 @@ export async function updateAdoptionRequestStatus(
 
   const now = new Date().toISOString();
 
-  const updated = await repository.updateStatus(requestId, {
-    status,
-    rejectionReason: status === "rejected" ? (rejectionReason ?? null) : null,
-    approvedAt: status === "approved" ? now : null,
-    rejectedAt: status === "rejected" ? now : null,
-    updatedAt: now,
+  if (status === "rejected") {
+    const updated = await repository.updateStatus(requestId, {
+      status: "rejected",
+      rejectionReason: rejectionReason ?? null,
+      approvedAt: null,
+      rejectedAt: now,
+      updatedAt: now,
+    });
+
+    if (!updated) {
+      return {
+        error: "Adoption request not found" as const,
+        status: 404 as const,
+      };
+    }
+
+    return {
+      data: toResponse({ ...updated, pet: existing.pet }),
+    };
+  }
+
+  // Approving an adoption is a three-part change that must be atomic: mark this
+  // request approved, flip the pet to "adopted", and auto-reject every other
+  // pending request for the same pet (that pet is no longer available).
+  const updated = await db.transaction(async (tx) => {
+    const approved = await repository.updateStatus(
+      requestId,
+      {
+        status: "approved",
+        rejectionReason: null,
+        approvedAt: now,
+        rejectedAt: null,
+        updatedAt: now,
+      },
+      tx,
+    );
+
+    await repository.updatePetStatus(existing.petId, "adopted", tx);
+
+    await repository.rejectOtherPendingForPet(
+      existing.petId,
+      requestId,
+      {
+        rejectionReason: PET_ADOPTED_REJECTION_REASON,
+        rejectedAt: now,
+        updatedAt: now,
+      },
+      tx,
+    );
+
+    return approved;
   });
 
   if (!updated) {
