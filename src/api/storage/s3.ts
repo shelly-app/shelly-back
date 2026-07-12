@@ -14,6 +14,8 @@ const ALLOWED_IMAGE_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
+  "image/gif": "gif",
+  "image/avif": "avif",
 };
 
 const UPLOAD_URL_TTL_SECONDS = 300;
