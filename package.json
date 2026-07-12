@@ -2,13 +2,14 @@
   "name": "shelly-api",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.ts",
   "packageManager": "pnpm@11.10.0",
   "_moduleAliases": {
     "@": "./dist"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "dev": "tsx watch --env-file=.env src/api/server.ts",
     "start": "node --require module-alias/register --env-file=.env dist/api/server.js",
     "check": "biome check --write",
@@ -54,8 +55,9 @@
     "drizzle-kit": "0.31.8",
     "husky": "9.1.7",
     "lint-staged": "16.2.7",
+    "tsc-alias": "^1.9.0",
     "tsx": "4.21.0",
-    "typescript": "5.9.3",
+    "typescript": "7.0.2",
     "vitest": "4.0.15"
   }
 }

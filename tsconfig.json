@@ -10,12 +10,10 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    "module": "CommonJS",
-    "ignoreDeprecations": "6.0",
-    "moduleResolution": "Node",
-    "baseUrl": ".",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "outDir": "dist",
     "sourceMap": true,
@@ -23,5 +21,8 @@
     "rootDir": "src"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "drizzle.config.ts"]
+  "exclude": ["node_modules", "dist", "drizzle.config.ts"],
+  "tsc-alias": {
+    "resolveFullPaths": true
+  }
 }
