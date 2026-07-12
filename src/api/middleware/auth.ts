@@ -100,10 +100,15 @@ export async function authMiddleware(
   } catch (err) {
     // Surface the actual reason (token expired, issuer/audience mismatch,
     // missing claims, etc.) in the server logs; the client still gets a
-    // generic message so we don't leak verification details.
+    // generic message so we don't leak verification details. Drizzle wraps
+    // DB/connection failures as a generic "Failed query: ..." message and
+    // stashes the real Postgres error on `.cause`, so log that too — otherwise
+    // an infra problem (e.g. a stale pool after the DB container is recreated)
+    // is indistinguishable from a genuine token failure.
     console.error(
       "Auth verification failed:",
       err instanceof Error ? err.message : err,
+      err instanceof Error && err.cause ? { cause: err.cause } : "",
     );
     res.status(StatusCodes.UNAUTHORIZED).json({ error: "Invalid token" });
   }
