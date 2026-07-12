@@ -11,6 +11,7 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "module": "CommonJS",
+    "ignoreDeprecations": "6.0",
     "moduleResolution": "Node",
     "baseUrl": ".",
     "paths": {
@@ -18,7 +19,8 @@
     },
     "outDir": "dist",
     "sourceMap": true,
-    "lib": ["ES2022"]
+    "lib": ["ES2022"],
+    "rootDir": "src"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "drizzle.config.ts"]
