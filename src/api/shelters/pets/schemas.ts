@@ -52,6 +52,10 @@ export const registerVaccinationBodySchema = z.object({
 export const registerEventBodySchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
+  scheduledFor: z
+    .union([z.iso.datetime(), z.iso.date()])
+    .transform((v) => new Date(v))
+    .optional(),
 });
 
 export const petEventParamsSchema = z.object({

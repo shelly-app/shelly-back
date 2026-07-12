@@ -111,7 +111,9 @@ export async function handleRegisterVaccination(req: Request, res: Response) {
 
 export async function handleRegisterEvent(req: Request, res: Response) {
   const { shelterId, petId } = shelterPetParamsSchema.parse(req.params);
-  const { name, description } = registerEventBodySchema.parse(req.body);
+  const { name, description, scheduledFor } = registerEventBodySchema.parse(
+    req.body,
+  );
   const userId = (req.user as User).id;
   const result = await registerEvent(
     shelterId,
@@ -119,6 +121,7 @@ export async function handleRegisterEvent(req: Request, res: Response) {
     userId,
     name,
     description,
+    scheduledFor,
   );
 
   if ("error" in result) {

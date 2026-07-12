@@ -41,12 +41,21 @@ export async function findShelterPets(shelterId: number) {
         administeredAt: v.administeredAt.toISOString(),
       })),
       events: p.events.map(
-        ({ id, type, name, description, metadata, createdAt }) => ({
+        ({
+          id,
+          type,
+          name,
+          description,
+          metadata,
+          scheduledFor,
+          createdAt,
+        }) => ({
           id,
           type,
           name,
           description,
           metadata: metadata ?? null,
+          scheduledFor: scheduledFor ? scheduledFor.toISOString() : null,
           createdAt: createdAt.toISOString(),
         }),
       ),

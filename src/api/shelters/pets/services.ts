@@ -88,6 +88,7 @@ export async function findShelterManagedPets(shelterId: number) {
         name: e.name,
         description: e.description,
         metadata: e.metadata ?? null,
+        scheduledFor: e.scheduledFor ? e.scheduledFor.toISOString() : null,
         createdAt: e.createdAt.toISOString(),
       })),
     }),
@@ -123,6 +124,7 @@ export async function findShelterPetDetailed(shelterId: number, petId: number) {
       name: e.name,
       description: e.description,
       metadata: e.metadata ?? null,
+      scheduledFor: e.scheduledFor ? e.scheduledFor.toISOString() : null,
       createdAt: e.createdAt.toISOString(),
     })),
   };
@@ -496,6 +498,7 @@ export async function registerEvent(
   userId: number,
   name: string,
   description?: string,
+  scheduledFor?: Date,
 ) {
   const petInShelter = await repository.findById(petId, shelterId);
 
@@ -507,6 +510,7 @@ export async function registerEvent(
     type: "user_event",
     name,
     description,
+    scheduledFor,
   });
 
   if (!newEvent) {
@@ -518,6 +522,9 @@ export async function registerEvent(
       id: newEvent.id,
       name: newEvent.name,
       description: newEvent.description,
+      scheduledFor: newEvent.scheduledFor
+        ? newEvent.scheduledFor.toISOString()
+        : null,
       createdAt: newEvent.createdAt.toISOString(),
     },
   };

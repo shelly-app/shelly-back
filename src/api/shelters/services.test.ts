@@ -128,6 +128,7 @@ describe("shelters/services", () => {
             name: "Status change",
             description: "Status changed from pending to in_shelter",
             metadata: { from: "pending", to: "in_shelter" },
+            scheduledFor: null,
             createdAt: "2023-01-02T00:00:00.000Z",
           },
         ],

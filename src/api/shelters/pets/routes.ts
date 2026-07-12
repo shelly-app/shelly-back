@@ -238,6 +238,7 @@ export const shelterPetsPaths: ZodOpenApiPathsObject = {
                 id: z.number().int().positive(),
                 name: z.string(),
                 description: z.string().nullable(),
+                scheduledFor: z.iso.datetime().nullable(),
                 createdAt: z.iso.datetime(),
               }),
             },

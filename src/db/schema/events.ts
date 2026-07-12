@@ -37,6 +37,7 @@ export const events = pgTable("events", {
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   metadata: jsonb("metadata").$type<EventMetadata>(),
+  scheduledFor: timestamp("scheduled_for"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

@@ -131,6 +131,7 @@ export async function createEventRecord(values: {
   name: string;
   description?: string;
   metadata?: EventMetadata;
+  scheduledFor?: Date;
 }) {
   const [result] = await db.insert(events).values(values).returning();
   if (!result) throw new Error("Failed to create event");
