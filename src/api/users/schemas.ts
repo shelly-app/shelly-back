@@ -8,6 +8,7 @@ export const userResponseSchema = z.object({
   id: z.number(),
   name: z.string(),
   email: z.email(),
+  avatarUrl: z.string().nullable(),
   shelters: z.array(
     z.object({
       id: z.number(),
@@ -19,6 +20,8 @@ export const userResponseSchema = z.object({
 
 export const updateUserBodySchema = z.object({
   name: z.string().trim().min(1).optional(),
+  // S3 key of a previously uploaded avatar image. Empty string clears it.
+  avatarKey: z.string().trim().optional(),
   shelterRoles: z
     .array(
       z.object({
@@ -33,11 +36,13 @@ export const updateUserResponseSchema = z.object({
   id: z.number(),
   name: z.string(),
   email: z.email(),
+  avatarUrl: z.string().nullable(),
 });
 
 export const meResponseSchema = z.object({
   name: z.string(),
   email: z.email(),
+  avatarUrl: z.string().nullable(),
   shelters: z.array(
     z.object({
       id: z.number(),

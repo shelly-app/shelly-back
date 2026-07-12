@@ -24,6 +24,7 @@ export const petResponseSchema = petSelectSchema
   .omit({
     shelterId: true,
     deletedAt: true,
+    photoKey: true,
   })
   .partial({ createdAt: true, updatedAt: true })
   .extend({
@@ -33,6 +34,7 @@ export const petResponseSchema = petSelectSchema
     size: z.enum(sizeEnum.enumValues).nullable(),
     status: z.enum(statusEnum.enumValues),
     colors: z.array(z.string()),
+    photoUrl: z.string().nullable(),
     shelter: z.object({
       name: z.string(),
       city: z.string(),

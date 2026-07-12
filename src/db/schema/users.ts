@@ -8,6 +8,7 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   name: varchar("name", { length: 255 }).notNull(),
   cognitoSub: varchar("cognito_sub", { length: 255 }).notNull().unique(),
+  avatarKey: varchar("avatar_key", { length: 512 }),
   ...timestamps,
 });
 

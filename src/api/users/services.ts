@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { hasPermission } from "@/api/middleware/require-permission";
+import { buildPublicUrl, deleteObject } from "@/api/storage/s3";
 import * as repository from "@/api/users/repository";
 
 export async function findUserWithSharedShelters(
@@ -25,6 +26,7 @@ export async function findUserWithSharedShelters(
     id: targetUser.id,
     name: targetUser.name,
     email: targetUser.email,
+    avatarUrl: buildPublicUrl(targetUser.avatarKey),
     shelters: targetMemberships.map((m) => ({
       id: m.shelterId,
       name: m.shelter.name,
@@ -35,6 +37,24 @@ export async function findUserWithSharedShelters(
 
 export async function updateUserName(userId: number, name: string) {
   await repository.updateName(userId, name);
+}
+
+/**
+ * Sets (or clears, with an empty string) the user's avatar. Deletes the
+ * previously stored image from S3 after the new key is committed.
+ */
+export async function updateUserAvatar(userId: number, avatarKey: string) {
+  const existing = await repository.findById(userId);
+  const previousKey = existing?.avatarKey ?? null;
+  const nextKey = avatarKey.length > 0 ? avatarKey : null;
+
+  if (previousKey === nextKey) return;
+
+  await repository.updateAvatarKey(userId, nextKey);
+
+  if (previousKey) {
+    await deleteObject(previousKey);
+  }
 }
 
 export async function canEditUser(
@@ -99,6 +119,7 @@ export async function getAuthenticatedUser(userId: number) {
   return {
     name: user.name,
     email: user.email,
+    avatarUrl: buildPublicUrl(user.avatarKey),
     shelters: user.shelterMemberships.map((membership) => ({
       id: membership.shelterId,
       name: membership.shelter.name,

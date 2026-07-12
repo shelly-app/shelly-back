@@ -113,6 +113,7 @@ describe("shelters/services", () => {
         status: "in_shelter",
         description: "Friendly dog",
         colors: ["golden"],
+        photoUrl: null,
         shelter: { name: "Happy Paws", city: "Austin" },
         vaccinations: [
           {

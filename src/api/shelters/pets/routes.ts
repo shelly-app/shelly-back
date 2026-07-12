@@ -8,9 +8,11 @@ import {
   petResponseSchema,
 } from "@/api/pets/schemas";
 import {
+  handleCreatePetPhotoUploadUrl,
   handleDeleteEvent,
   handleDeletePet,
   handleGetPet,
+  handleListShelterPets,
   handleRegisterEvent,
   handleRegisterPet,
   handleRegisterVaccination,
@@ -32,6 +34,22 @@ shelterPetsRouter.post(
   "/",
   requirePermission(Permissions.PETS_WRITE),
   handleRegisterPet,
+);
+
+shelterPetsRouter.post(
+  "/photo-upload-url",
+  requirePermission(Permissions.PETS_WRITE),
+  handleCreatePetPhotoUploadUrl,
+);
+
+// Staff management list: all pets for the shelter regardless of status. The
+// public, status-filtered list is served by the unauthenticated
+// `GET /shelters/:id/pets` route. Registered before "/:petId" so the literal
+// segment is not captured as a pet id.
+shelterPetsRouter.get(
+  "/all",
+  requirePermission(Permissions.PETS_READ),
+  handleListShelterPets,
 );
 
 shelterPetsRouter.get("/:petId", handleGetPet);
@@ -67,6 +85,22 @@ shelterPetsRouter.delete(
 );
 
 export const shelterPetsPaths: ZodOpenApiPathsObject = {
+  "/shelters/{shelterId}/pets/all": {
+    get: {
+      requestParams: {
+        path: shelterIdParamsSchema,
+      },
+      responses: {
+        [StatusCodes.OK]: {
+          content: {
+            "application/json": {
+              schema: z.array(detailedPetResponseSchema),
+            },
+          },
+        },
+      },
+    },
+  },
   "/shelters/{shelterId}/pets": {
     post: {
       requestParams: {

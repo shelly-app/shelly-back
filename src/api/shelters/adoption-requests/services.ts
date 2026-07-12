@@ -1,6 +1,7 @@
 import type { z } from "zod";
 import * as repository from "@/api/shelters/adoption-requests/repository";
 import type { adoptionRequestResponseSchema } from "@/api/shelters/adoption-requests/schemas";
+import { buildPublicUrl } from "@/api/storage/s3";
 import { db } from "@/db";
 import type { AdoptionRequest } from "@/db/schema";
 
@@ -11,7 +12,7 @@ const PET_ADOPTED_REJECTION_REASON =
   "app.requests.rejection_reasons.pet_adopted";
 
 type AdoptionRequestWithPet = AdoptionRequest & {
-  pet: { id: number; name: string } | null;
+  pet: { id: number; name: string; photoKey?: string | null } | null;
 };
 
 type AdoptionRequestResponse = z.infer<typeof adoptionRequestResponseSchema>;
@@ -21,6 +22,7 @@ function toResponse(row: AdoptionRequestWithPet): AdoptionRequestResponse {
     id: row.id,
     petId: row.petId,
     petName: row.pet?.name ?? "",
+    petPhotoUrl: buildPublicUrl(row.pet?.photoKey) ?? undefined,
     requesterName: row.requesterName,
     requesterEmail: row.requesterEmail,
     requesterPhone: row.requesterPhone,

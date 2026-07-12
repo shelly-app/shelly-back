@@ -1,5 +1,6 @@
 import { ZodError } from "zod";
 import * as repository from "@/api/shelters/members/repository";
+import { buildPublicUrl } from "@/api/storage/s3";
 
 export async function findShelterMembers(shelterId: number) {
   const members = await repository.findByShelterId(shelterId);
@@ -8,6 +9,7 @@ export async function findShelterMembers(shelterId: number) {
     userId: m.userId,
     name: m.user.name,
     email: m.user.email,
+    avatarUrl: buildPublicUrl(m.user.avatarKey),
     role: m.role.name,
     joinedAt: m.joinedAt,
   }));

@@ -13,10 +13,14 @@ export async function findById(id: number) {
 
 export async function findPets(shelterId: number) {
   return db.query.pet.findMany({
-    // Adopter-facing list: only pets still open for adoption ("in_shelter" or
-    // "in_foster"); "adopted" (already placed) and "deceased" are excluded.
+    // Public adopter-facing list: only pets still open for adoption
+    // ("in_shelter" or "in_foster"); "adopted" and "deceased" are excluded.
     where: (p, { and, eq, isNull, inArray }) =>
-      and(isNull(p.deletedAt), eq(p.shelterId, shelterId)),
+      and(
+        isNull(p.deletedAt),
+        eq(p.shelterId, shelterId),
+        inArray(p.status, ["in_shelter", "in_foster"]),
+      ),
     with: {
       shelter: true,
       vaccinations: { with: { vaccine: true } },

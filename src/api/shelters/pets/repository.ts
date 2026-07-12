@@ -10,6 +10,22 @@ import type {
 } from "@/db/schema";
 import { events, pet, shelter, vaccinations, vaccines } from "@/db/schema";
 
+export async function findAllByShelter(shelterId: number) {
+  // Staff management list: every pet belonging to the shelter regardless of
+  // status (unlike the public adoption list, which is filtered by status).
+  return db.query.pet.findMany({
+    where: (p, { and, eq, isNull }) =>
+      and(isNull(p.deletedAt), eq(p.shelterId, shelterId)),
+    with: {
+      shelter: true,
+      vaccinations: { with: { vaccine: true } },
+      events: {
+        orderBy: (e, { desc }) => [desc(e.createdAt)],
+      },
+    },
+  });
+}
+
 export async function findById(petId: number, shelterId: number) {
   return db.query.pet.findFirst({
     where: (p, { and, eq, isNull }) =>
@@ -45,6 +61,7 @@ type CreatePetInput = {
   status: StatusValue;
   specie: SpecieValue;
   description?: string | null;
+  photoKey?: string | null;
   shelterId: number;
   birthDate?: string;
 };
@@ -59,6 +76,7 @@ type UpdatePetInput = {
   status?: StatusValue;
   specie?: SpecieValue;
   description?: string | null;
+  photoKey?: string | null;
 };
 
 export async function createPet(values: CreatePetInput) {

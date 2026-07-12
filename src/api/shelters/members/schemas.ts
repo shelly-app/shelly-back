@@ -14,6 +14,7 @@ export const memberResponseSchema = z.array(
     userId: z.number(),
     name: z.string(),
     email: z.email(),
+    avatarUrl: z.string().nullable(),
     role: z.string(),
     joinedAt: z.date(),
   }),

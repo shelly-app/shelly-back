@@ -12,13 +12,34 @@ import {
 import {
   deleteEvent,
   deletePet,
+  findShelterManagedPets,
   findShelterPetDetailed,
   registerEvent,
   registerPet,
   registerVaccination,
   updatePet,
 } from "@/api/shelters/pets/services";
+import { createPresignedUpload } from "@/api/storage/s3";
+import { uploadUrlBodySchema } from "@/api/storage/schemas";
 import type { User } from "@/db/schema";
+
+export async function handleCreatePetPhotoUploadUrl(
+  req: Request,
+  res: Response,
+) {
+  const { contentType } = uploadUrlBodySchema.parse(req.body);
+
+  const result = await createPresignedUpload("media/pets", contentType);
+
+  return res.status(StatusCodes.OK).json(result);
+}
+
+export async function handleListShelterPets(req: Request, res: Response) {
+  const { shelterId } = shelterIdParamsSchema.parse(req.params);
+  const pets = await findShelterManagedPets(shelterId);
+
+  return res.status(StatusCodes.OK).json(pets);
+}
 
 export async function handleGetPet(req: Request, res: Response) {
   const { shelterId, petId } = shelterPetParamsSchema.parse(req.params);

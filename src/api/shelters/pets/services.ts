@@ -5,6 +5,7 @@ import type {
   petResponseSchema,
 } from "@/api/pets/schemas";
 import * as repository from "@/api/shelters/pets/repository";
+import { buildPublicUrl, deleteObject } from "@/api/storage/s3";
 import { toDateOnly } from "@/api/utils";
 import { db } from "@/db";
 import {
@@ -59,6 +60,40 @@ async function resolveVaccineIds(
   return ids;
 }
 
+export async function findShelterManagedPets(shelterId: number) {
+  const pets = await repository.findAllByShelter(shelterId);
+
+  return pets.map(
+    (p): z.infer<typeof detailedPetResponseSchema> => ({
+      id: p.id,
+      name: p.name,
+      birthDate: toDateOnly(p.birthDate),
+      breed: p.breed,
+      specie: p.specie as SpecieValue,
+      sex: p.sex as SexValue,
+      size: p.size as SizeValue | null,
+      status: p.status as StatusValue,
+      description: p.description,
+      colors: (p.colors ?? []) as string[],
+      photoUrl: buildPublicUrl(p.photoKey),
+      shelter: { name: p.shelter.name, city: p.shelter.city },
+      vaccinations: p.vaccinations.map((v) => ({
+        vaccine: v.vaccine.name,
+        vaccineCode: v.vaccine.code,
+        administeredAt: v.administeredAt.toISOString(),
+      })),
+      events: p.events.map((e) => ({
+        id: e.id,
+        type: e.type,
+        name: e.name,
+        description: e.description,
+        metadata: e.metadata ?? null,
+        createdAt: e.createdAt.toISOString(),
+      })),
+    }),
+  );
+}
+
 export async function findShelterPetDetailed(shelterId: number, petId: number) {
   const result = await repository.findById(petId, shelterId);
 
@@ -75,6 +110,7 @@ export async function findShelterPetDetailed(shelterId: number, petId: number) {
     status: result.status as StatusValue,
     description: result.description,
     colors: (result.colors ?? []) as string[],
+    photoUrl: buildPublicUrl(result.photoKey),
     shelter: { name: result.shelter.name, city: result.shelter.city },
     vaccinations: result.vaccinations.map((v) => ({
       vaccine: v.vaccine.name,
@@ -106,6 +142,7 @@ export async function registerPet(
     birthDate?: string;
     description?: string | null;
     colors?: string[];
+    photoKey?: string | null;
     vaccines?: string[];
   },
 ) {
@@ -169,6 +206,7 @@ export async function registerPet(
     colors: petColors,
     status: body.status as StatusValue,
     description: body.description,
+    photoKey: body.photoKey ?? null,
     shelterId,
     birthDate: body.birthDate,
   });
@@ -188,6 +226,7 @@ export async function registerPet(
     specie: newPet.specie as SpecieValue,
     status: newPet.status as StatusValue,
     colors: (newPet.colors ?? []) as string[],
+    photoUrl: buildPublicUrl(newPet.photoKey),
     shelter: { name: shelterRecord.name, city: shelterRecord.city },
     createdAt: newPet.createdAt,
   };
@@ -209,6 +248,7 @@ export async function updatePet(
     status?: string;
     specie?: string;
     colors?: string[];
+    photoKey?: string | null;
     vaccines?: string[];
   },
 ) {
@@ -226,6 +266,7 @@ export async function updatePet(
     status?: StatusValue;
     specie?: SpecieValue;
     description?: string;
+    photoKey?: string | null;
   } = {};
 
   if (body.status !== undefined) {
@@ -296,6 +337,17 @@ export async function updatePet(
     updateData.description = body.description ?? undefined;
   }
 
+  // Normalize the incoming photo key (empty string clears it) and only touch it
+  // when it actually changes, so we know whether to delete the replaced image.
+  const previousPhotoKey = existing.photoKey ?? null;
+  if (body.photoKey !== undefined) {
+    const nextPhotoKey =
+      body.photoKey && body.photoKey.length > 0 ? body.photoKey : null;
+    if (nextPhotoKey !== previousPhotoKey) {
+      updateData.photoKey = nextPhotoKey;
+    }
+  }
+
   // Resolve desired vaccines before mutating so invalid codes fail early.
   const desiredVaccineIds =
     body.vaccines !== undefined
@@ -360,6 +412,11 @@ export async function updatePet(
     return petRow;
   });
 
+  // Remove the replaced image only after the new key is safely persisted.
+  if (updateData.photoKey !== undefined && previousPhotoKey) {
+    await deleteObject(previousPhotoKey);
+  }
+
   const response: z.infer<typeof petResponseSchema> = {
     id: updatedPet.id,
     name: updatedPet.name,
@@ -371,6 +428,7 @@ export async function updatePet(
     specie: updatedPet.specie as SpecieValue,
     status: updatedPet.status as StatusValue,
     colors: (updatedPet.colors ?? []) as string[],
+    photoUrl: buildPublicUrl(updatedPet.photoKey),
     shelter: { name: existing.shelter.name, city: existing.shelter.city },
     updatedAt: updatedPet.updatedAt ?? existing.updatedAt,
   };

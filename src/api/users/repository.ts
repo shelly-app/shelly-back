@@ -18,6 +18,13 @@ export async function updateName(userId: number, name: string) {
   await db.update(users).set({ name }).where(eq(users.id, userId));
 }
 
+export async function updateAvatarKey(
+  userId: number,
+  avatarKey: string | null,
+) {
+  await db.update(users).set({ avatarKey }).where(eq(users.id, userId));
+}
+
 export async function findShelterMemberships(userId: number) {
   return db.query.users.findFirst({
     where: eq(users.id, userId),

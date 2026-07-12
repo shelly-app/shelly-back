@@ -50,6 +50,7 @@ describe("users/services", () => {
         id: 2,
         name: "Jane Doe",
         email: "jane@example.com",
+        avatarUrl: null,
         shelters: [{ id: 1, name: "Happy Paws", role: "admin" }],
       });
     });
@@ -266,6 +267,7 @@ describe("users/services", () => {
       expect(result).toEqual({
         name: "John Doe",
         email: "john@example.com",
+        avatarUrl: null,
         shelters: [{ id: 1, name: "Happy Paws", role: "admin" }],
       });
     });

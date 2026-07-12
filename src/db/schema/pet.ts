@@ -47,6 +47,7 @@ export const pet = pgTable("pets", {
   colors: text("colors").array().$type<ColorValue[]>(),
   status: statusEnum("status").notNull(),
   description: text("description"),
+  photoKey: varchar("photo_key", { length: 512 }),
   shelterId: integer("shelter_id")
     .notNull()
     .references(() => shelter.id),

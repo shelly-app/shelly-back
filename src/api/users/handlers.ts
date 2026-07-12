@@ -1,12 +1,15 @@
 import type { Request, Response } from "express";
 import { StatusCodes } from "@/api/constants";
 import { hasPermission } from "@/api/middleware/require-permission";
+import { buildPublicUrl, createPresignedUpload } from "@/api/storage/s3";
+import { uploadUrlBodySchema } from "@/api/storage/schemas";
 import { updateUserBodySchema, userIdParamsSchema } from "@/api/users/schemas";
 import {
   canEditUser,
   findUserById,
   findUserWithSharedShelters,
   getAuthenticatedUser,
+  updateUserAvatar,
   updateUserName,
   updateUserShelterRole,
 } from "@/api/users/services";
@@ -16,6 +19,14 @@ export async function getMe(req: Request, res: Response) {
   const user = req.user as User;
 
   const result = await getAuthenticatedUser(user.id);
+
+  return res.status(StatusCodes.OK).json(result);
+}
+
+export async function createAvatarUploadUrl(req: Request, res: Response) {
+  const { contentType } = uploadUrlBodySchema.parse(req.body);
+
+  const result = await createPresignedUpload("media/avatars", contentType);
 
   return res.status(StatusCodes.OK).json(result);
 }
@@ -52,6 +63,19 @@ export async function updateUser(req: Request, res: Response) {
     }
 
     await updateUserName(id, body.name);
+  }
+
+  if (body.avatarKey !== undefined) {
+    if (!isSelf) {
+      const canEdit = await canEditUser(currentUser.id, id);
+      if (!canEdit) {
+        return res
+          .status(StatusCodes.FORBIDDEN)
+          .json({ error: "Forbidden: Insufficient permissions" });
+      }
+    }
+
+    await updateUserAvatar(id, body.avatarKey);
   }
 
   if (body.shelterRoles) {
@@ -92,5 +116,6 @@ export async function updateUser(req: Request, res: Response) {
     id: updatedUser.id,
     name: updatedUser.name,
     email: updatedUser.email,
+    avatarUrl: buildPublicUrl(updatedUser.avatarKey),
   });
 }

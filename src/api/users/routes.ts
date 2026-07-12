@@ -2,7 +2,12 @@ import { Router } from "express";
 import type { ZodOpenApiPathsObject } from "zod-openapi";
 import { StatusCodes } from "@/api/constants";
 import { authMiddleware } from "@/api/middleware/auth";
-import { getMe, getUser, updateUser } from "@/api/users/handlers";
+import {
+  createAvatarUploadUrl,
+  getMe,
+  getUser,
+  updateUser,
+} from "@/api/users/handlers";
 import {
   meResponseSchema,
   updateUserBodySchema,
@@ -16,6 +21,7 @@ export const usersRouter = Router();
 usersRouter.use(authMiddleware);
 
 usersRouter.get("/users/me", getMe);
+usersRouter.post("/users/me/avatar-upload-url", createAvatarUploadUrl);
 usersRouter.get("/users/:id", getUser);
 usersRouter.patch("/users/:id", updateUser);
 

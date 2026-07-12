@@ -1,6 +1,7 @@
 import type { z } from "zod";
 import type { detailedPetResponseSchema } from "@/api/pets/schemas";
 import * as repository from "@/api/shelters/repository";
+import { buildPublicUrl } from "@/api/storage/s3";
 import { toDateOnly } from "@/api/utils";
 import type {
   SexValue,
@@ -32,6 +33,7 @@ export async function findShelterPets(shelterId: number) {
       status: p.status as StatusValue,
       description: p.description,
       colors: (p.colors ?? []) as string[],
+      photoUrl: buildPublicUrl(p.photoKey),
       shelter: { name: p.shelter.name, city: p.shelter.city },
       vaccinations: p.vaccinations.map((v) => ({
         vaccine: v.vaccine.name,

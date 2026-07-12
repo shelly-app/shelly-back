@@ -1,6 +1,7 @@
 import type { z } from "zod";
 import * as repository from "@/api/pets/repository";
 import type { petResponseSchema } from "@/api/pets/schemas";
+import { buildPublicUrl } from "@/api/storage/s3";
 import { toDateOnly } from "@/api/utils";
 import type {
   SexValue,
@@ -24,6 +25,7 @@ export async function findAllPublicPets() {
       status: p.status as StatusValue,
       description: p.description,
       colors: (p.colors ?? []) as string[],
+      photoUrl: buildPublicUrl(p.photoKey),
       shelter: { name: p.shelter.name, city: p.shelter.city },
     }),
   );
@@ -45,6 +47,7 @@ export async function findPublicPetById(id: number) {
     status: pet.status as StatusValue,
     description: pet.description,
     colors: (pet.colors ?? []) as string[],
+    photoUrl: buildPublicUrl(pet.photoKey),
     shelter: { name: pet.shelter.name, city: pet.shelter.city },
   };
 
