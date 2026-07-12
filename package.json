@@ -14,7 +14,7 @@
     "start": "node --require module-alias/register --env-file=.env dist/api/server.js",
     "check": "biome check --write",
     "test": "vitest run",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "db:generate": "cross-env NODE_OPTIONS='--import tsx' drizzle-kit generate",
     "db:migrate": "cross-env DB_MIGRATING=true tsx --env-file=.env src/db/migrate.ts",
     "db:seed": "cross-env DB_SEEDING=true tsx --env-file=.env src/db/seed.ts",
