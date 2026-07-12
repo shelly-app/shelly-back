@@ -10,7 +10,7 @@ import {
   vaccinations,
   vaccines,
 } from "@/db/schema";
-import petsData from "./data/pets.json";
+import petsData from "./data/pets.json" with { type: "json" };
 
 export async function seedPets(db: db) {
   const [allShelters, allVaccines, allUsers] = await Promise.all([

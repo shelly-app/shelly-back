@@ -1,7 +1,7 @@
 import type { db } from "@/db";
 import { vaccines } from "@/db/schema";
 import type { SpecieValue } from "@/db/schema/enums";
-import vaccinesData from "./data/vaccines.json";
+import vaccinesData from "./data/vaccines.json" with { type: "json" };
 
 export async function seedVaccines(db: db) {
   const values = vaccinesData.map(

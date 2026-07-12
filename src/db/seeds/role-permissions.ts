@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import type { db } from "@/db";
 import { permissions, rolePermissions, roles } from "@/db/schema";
-import data from "./data/role-permissions.json";
+import data from "./data/role-permissions.json" with { type: "json" };
 
 export async function seedRolePermissions(db: db) {
   for (const entry of data) {

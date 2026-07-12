@@ -1,6 +1,6 @@
 import type { db } from "@/db";
 import { shelter } from "@/db/schema";
-import shelters from "./data/shelters.json";
+import shelters from "./data/shelters.json" with { type: "json" };
 
 export async function seedShelter(db: db) {
   await db.insert(shelter).values(shelters);
