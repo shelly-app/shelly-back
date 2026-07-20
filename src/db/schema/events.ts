@@ -15,6 +15,7 @@ import { users } from "@/db/schema/users";
 export type EventMetadata = {
   from?: string | null;
   to?: string | null;
+  hasTime?: boolean;
 };
 
 export const eventTypeEnum = pgEnum("event_type", [

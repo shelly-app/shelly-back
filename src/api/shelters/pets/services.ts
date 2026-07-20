@@ -499,6 +499,7 @@ export async function registerEvent(
   name: string,
   description?: string,
   scheduledFor?: Date,
+  hasTime?: boolean,
 ) {
   const petInShelter = await repository.findById(petId, shelterId);
 
@@ -511,6 +512,7 @@ export async function registerEvent(
     name,
     description,
     scheduledFor,
+    ...(hasTime ? { metadata: { hasTime: true } } : {}),
   });
 
   if (!newEvent) {

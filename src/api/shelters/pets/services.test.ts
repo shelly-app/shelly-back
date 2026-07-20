@@ -461,6 +461,7 @@ describe("shelters/pets/services", () => {
 
       vi.mocked(repository.findById).mockResolvedValue(mockPet);
       vi.mocked(repository.createEventRecord).mockResolvedValue(mockEvent);
+      const scheduledFor = new Date("2026-07-21T15:30:00.000Z");
 
       const result = await services.registerEvent(
         1,
@@ -468,9 +469,20 @@ describe("shelters/pets/services", () => {
         1,
         "Vet visit",
         "Annual checkup",
+        scheduledFor,
+        true,
       );
 
       expect(result.data?.name).toBe("Vet visit");
+      expect(repository.createEventRecord).toHaveBeenCalledWith({
+        petId: 1,
+        userId: 1,
+        type: "user_event",
+        name: "Vet visit",
+        description: "Annual checkup",
+        scheduledFor,
+        metadata: { hasTime: true },
+      });
     });
 
     it("should return error when pet not found", async () => {
