@@ -138,6 +138,19 @@ export async function createEventRecord(values: {
   return result;
 }
 
+export async function updateEventMetadata(
+  eventId: number,
+  petId: number,
+  metadata: EventMetadata,
+) {
+  const [updated] = await db
+    .update(events)
+    .set({ metadata })
+    .where(and(eq(events.id, eventId), eq(events.petId, petId)))
+    .returning();
+  return updated;
+}
+
 export async function deleteEventRecord(eventId: number, petId: number) {
   await db
     .delete(events)

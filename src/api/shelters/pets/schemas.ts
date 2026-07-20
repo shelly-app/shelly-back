@@ -59,6 +59,10 @@ export const registerEventBodySchema = z.object({
     .optional(),
 });
 
+export const updateEventOutcomeBodySchema = z.object({
+  outcome: z.enum(["completed", "canceled"]),
+});
+
 export const petEventParamsSchema = z.object({
   shelterId: z.coerce.number().int().positive(),
   petId: z.coerce.number().int().positive(),

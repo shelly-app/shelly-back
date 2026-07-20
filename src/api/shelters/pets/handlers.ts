@@ -7,6 +7,7 @@ import {
   registerVaccinationBodySchema,
   shelterIdParamsSchema,
   shelterPetParamsSchema,
+  updateEventOutcomeBodySchema,
   updatePetBodySchema,
 } from "@/api/shelters/pets/schemas";
 import {
@@ -17,6 +18,7 @@ import {
   registerEvent,
   registerPet,
   registerVaccination,
+  updateEventOutcome,
   updatePet,
 } from "@/api/shelters/pets/services";
 import { createPresignedUpload } from "@/api/storage/s3";
@@ -129,6 +131,18 @@ export async function handleRegisterEvent(req: Request, res: Response) {
   }
 
   return res.status(StatusCodes.CREATED).json(result.data);
+}
+
+export async function handleUpdateEventOutcome(req: Request, res: Response) {
+  const { shelterId, petId, eventId } = petEventParamsSchema.parse(req.params);
+  const { outcome } = updateEventOutcomeBodySchema.parse(req.body);
+  const result = await updateEventOutcome(shelterId, petId, eventId, outcome);
+
+  if ("error" in result) {
+    return res.status(StatusCodes.NOT_FOUND).json({ error: result.error });
+  }
+
+  return res.status(StatusCodes.OK).json(result.data);
 }
 
 export async function handleDeleteEvent(req: Request, res: Response) {

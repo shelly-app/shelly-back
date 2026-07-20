@@ -14,6 +14,7 @@ vi.mock("@/api/shelters/pets/repository", () => ({
     .fn()
     .mockResolvedValue({ id: 1, administeredAt: new Date() }),
   createEventRecord: vi.fn().mockResolvedValue({ id: 1 }),
+  updateEventMetadata: vi.fn().mockResolvedValue(undefined),
   deleteEventRecord: vi.fn().mockResolvedValue(undefined),
 }));
 
@@ -511,6 +512,61 @@ describe("shelters/pets/services", () => {
       await expect(
         services.registerEvent(1, 1, 1, "Vet visit"),
       ).rejects.toThrow("Failed to register event");
+    });
+  });
+
+  describe("updateEventOutcome", () => {
+    it("should persist the outcome while preserving event metadata", async () => {
+      const scheduledEvent = {
+        id: 1,
+        name: "Vet visit",
+        description: null,
+        createdAt: new Date(),
+        type: "user_event",
+        userId: 1,
+        petId: 1,
+        scheduledFor: new Date("2026-07-20T15:30:00.000Z"),
+        metadata: { hasTime: true },
+      };
+      const mockPet = {
+        ...baseMockPet,
+        shelter: { name: "Happy Paws", city: "Austin" },
+        vaccinations: [],
+        events: [scheduledEvent],
+      } as unknown as Awaited<ReturnType<typeof repository.findById>>;
+      const updatedEvent = {
+        ...scheduledEvent,
+        metadata: { hasTime: true, outcome: "completed" },
+      } as unknown as Awaited<
+        ReturnType<typeof repository.updateEventMetadata>
+      >;
+
+      vi.mocked(repository.findById).mockResolvedValue(mockPet);
+      vi.mocked(repository.updateEventMetadata).mockResolvedValue(updatedEvent);
+
+      const result = await services.updateEventOutcome(1, 1, 1, "completed");
+
+      expect(repository.updateEventMetadata).toHaveBeenCalledWith(1, 1, {
+        hasTime: true,
+        outcome: "completed",
+      });
+      expect(result).toEqual({ data: { id: 1, outcome: "completed" } });
+    });
+
+    it("should reject non-scheduled events", async () => {
+      const mockPet = {
+        ...baseMockPet,
+        shelter: { name: "Happy Paws", city: "Austin" },
+        vaccinations: [],
+        events: [],
+      } as unknown as Awaited<ReturnType<typeof repository.findById>>;
+
+      vi.mocked(repository.findById).mockResolvedValue(mockPet);
+
+      const result = await services.updateEventOutcome(1, 1, 1, "canceled");
+
+      expect(result).toEqual({ error: "Scheduled event not found" });
+      expect(repository.updateEventMetadata).not.toHaveBeenCalled();
     });
   });
 

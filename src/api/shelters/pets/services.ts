@@ -532,6 +532,38 @@ export async function registerEvent(
   };
 }
 
+export async function updateEventOutcome(
+  shelterId: number,
+  petId: number,
+  eventId: number,
+  outcome: "completed" | "canceled",
+) {
+  const petInShelter = await repository.findById(petId, shelterId);
+
+  if (!petInShelter) return { error: "Pet not found in shelter" as const };
+
+  const event = petInShelter.events.find(
+    ({ id, type, scheduledFor }) =>
+      id === eventId && type === "user_event" && scheduledFor,
+  );
+
+  if (!event) return { error: "Scheduled event not found" as const };
+
+  const updatedEvent = await repository.updateEventMetadata(eventId, petId, {
+    ...(event.metadata ?? {}),
+    outcome,
+  });
+
+  if (!updatedEvent) return { error: "Scheduled event not found" as const };
+
+  return {
+    data: {
+      id: updatedEvent.id,
+      outcome,
+    },
+  };
+}
+
 export async function deleteEvent(
   shelterId: number,
   petId: number,

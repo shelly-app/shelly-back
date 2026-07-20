@@ -16,6 +16,7 @@ export type EventMetadata = {
   from?: string | null;
   to?: string | null;
   hasTime?: boolean;
+  outcome?: "completed" | "canceled";
 };
 
 export const eventTypeEnum = pgEnum("event_type", [

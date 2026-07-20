@@ -63,6 +63,7 @@ export const detailedPetResponseSchema = petResponseSchema.extend({
             from: z.string().nullish(),
             to: z.string().nullish(),
             hasTime: z.boolean().optional(),
+            outcome: z.enum(["completed", "canceled"]).optional(),
           })
           .nullable(),
         scheduledFor: z.string().nullable(),

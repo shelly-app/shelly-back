@@ -16,6 +16,7 @@ import {
   handleRegisterEvent,
   handleRegisterPet,
   handleRegisterVaccination,
+  handleUpdateEventOutcome,
   handleUpdatePet,
 } from "@/api/shelters/pets/handlers";
 import {
@@ -25,6 +26,7 @@ import {
   registerVaccinationBodySchema,
   shelterIdParamsSchema,
   shelterPetParamsSchema,
+  updateEventOutcomeBodySchema,
   updatePetBodySchema,
 } from "@/api/shelters/pets/schemas";
 
@@ -82,6 +84,12 @@ shelterPetsRouter.delete(
   "/:petId/events/:eventId",
   requirePermission(Permissions.EVENTS_WRITE),
   handleDeleteEvent,
+);
+
+shelterPetsRouter.patch(
+  "/:petId/events/:eventId",
+  requirePermission(Permissions.EVENTS_WRITE),
+  handleUpdateEventOutcome,
 );
 
 export const shelterPetsPaths: ZodOpenApiPathsObject = {
@@ -255,6 +263,35 @@ export const shelterPetsPaths: ZodOpenApiPathsObject = {
     },
   },
   "/shelters/{shelterId}/pets/{petId}/events/{eventId}": {
+    patch: {
+      requestParams: { path: petEventParamsSchema },
+      requestBody: {
+        content: {
+          "application/json": {
+            schema: updateEventOutcomeBodySchema,
+          },
+        },
+      },
+      responses: {
+        [StatusCodes.OK]: {
+          content: {
+            "application/json": {
+              schema: z.object({
+                id: z.number().int().positive(),
+                outcome: z.enum(["completed", "canceled"]),
+              }),
+            },
+          },
+        },
+        [StatusCodes.NOT_FOUND]: {
+          content: {
+            "application/json": {
+              schema: z.object({ error: z.string() }),
+            },
+          },
+        },
+      },
+    },
     delete: {
       requestParams: { path: petEventParamsSchema },
       responses: {
