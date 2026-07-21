@@ -39,7 +39,9 @@
     "drizzle-orm": "0.45.1",
     "drizzle-zod": "0.8.3",
     "express": "5.2.1",
+    "express-rate-limit": "^8.6.0",
     "module-alias": "2.3.4",
+    "nodemailer": "^9.0.3",
     "pg": "8.16.3",
     "zod": "4.1.13",
     "zod-openapi": "5.4.5"
@@ -49,6 +51,7 @@
     "@types/cors": "2.8.19",
     "@types/express": "5.0.6",
     "@types/node": "25.0.1",
+    "@types/nodemailer": "^8.0.1",
     "@types/pg": "8.16.0",
     "cross-env": "10.1.0",
     "dotenv": "17.2.3",

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { rateLimit } from "express-rate-limit";
 import type { ZodOpenApiPathsObject } from "zod-openapi";
 import { StatusCodes } from "@/api/constants";
 import { handleCreateContactSubmission } from "@/api/contact/handlers";
@@ -13,7 +14,17 @@ import {
  */
 export const contactRouter = Router();
 
-contactRouter.post("/contact", handleCreateContactSubmission);
+const contactRateLimit = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    error: "Too many contact submissions. Please try again later.",
+  },
+});
+
+contactRouter.post("/contact", contactRateLimit, handleCreateContactSubmission);
 
 export const contactPaths: ZodOpenApiPathsObject = {
   "/contact": {
@@ -34,6 +45,9 @@ export const contactPaths: ZodOpenApiPathsObject = {
               schema: contactSubmissionResponseSchema,
             },
           },
+        },
+        [StatusCodes.TOO_MANY_REQUESTS]: {
+          description: "Too many contact submissions",
         },
       },
     },

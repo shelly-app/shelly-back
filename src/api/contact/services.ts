@@ -1,4 +1,5 @@
 import type { z } from "zod";
+import { sendContactSubmissionEmail } from "@/api/contact/email";
 import * as repository from "@/api/contact/repository";
 import type { createContactSubmissionBodySchema } from "@/api/contact/schemas";
 
@@ -20,6 +21,8 @@ export async function createContactSubmission(
     shelterLocation: body.shelterLocation ?? null,
     shelterType: body.shelterType ?? null,
   });
+
+  await sendContactSubmissionEmail(created);
 
   return { id: created.id, success: true as const };
 }

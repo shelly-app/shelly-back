@@ -1,5 +1,17 @@
 import { z } from "zod";
 
+const optionalString = z.preprocess(
+  (value) =>
+    typeof value === "string" && value.trim() === "" ? undefined : value,
+  z.string().trim().min(1).optional(),
+);
+
+const optionalEmail = z.preprocess(
+  (value) =>
+    typeof value === "string" && value.trim() === "" ? undefined : value,
+  z.email().optional(),
+);
+
 const envSchema = z.object({
   NODE_ENV: z.string("production"),
   DEBUG: z.stringbool().default(false),
@@ -40,6 +52,15 @@ const envSchema = z.object({
     .string()
     .optional()
     .transform((val) => val?.replace(/\/+$/, "")),
+  // Provider-neutral SMTP configuration. Gmail SMTP with an app password is
+  // a free option; other SMTP providers can be used without code changes.
+  SMTP_HOST: optionalString,
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+  SMTP_SECURE: z.stringbool().default(false),
+  SMTP_USER: optionalString,
+  SMTP_PASSWORD: optionalString,
+  SMTP_FROM_EMAIL: optionalEmail,
+  CONTACT_RECIPIENT_EMAIL: optionalEmail,
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -65,4 +86,11 @@ export const {
   S3_UPLOAD_BUCKET: s3UploadBucket,
   S3_REGION: s3Region,
   ASSET_PUBLIC_BASE_URL: assetPublicBaseUrl,
+  SMTP_HOST: smtpHost,
+  SMTP_PORT: smtpPort,
+  SMTP_SECURE: smtpSecure,
+  SMTP_USER: smtpUser,
+  SMTP_PASSWORD: smtpPassword,
+  SMTP_FROM_EMAIL: smtpFromEmail,
+  CONTACT_RECIPIENT_EMAIL: contactRecipientEmail,
 } = env;
