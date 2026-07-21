@@ -19,8 +19,6 @@ export async function createContactSubmission(
     shelterName: body.shelterName ?? null,
     shelterLocation: body.shelterLocation ?? null,
     shelterType: body.shelterType ?? null,
-    sponsorshipType: body.sponsorshipType ?? null,
-    budget: body.budget ?? null,
   });
 
   return { id: created.id, success: true as const };

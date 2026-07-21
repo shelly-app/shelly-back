@@ -64,6 +64,13 @@
       "when": 1783881531280,
       "tag": "20260712183851_add_scheduled_for_to_events",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1784597239685,
+      "tag": "20260721012719_remove_unused_sponsor_fields",
+      "breakpoints": true
     }
   ]
 }

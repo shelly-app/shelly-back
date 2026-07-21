@@ -11,8 +11,6 @@ export const createContactSubmissionBodySchema = z.object({
   shelterName: z.string().trim().optional(),
   shelterLocation: z.string().trim().optional(),
   shelterType: z.string().trim().optional(),
-  sponsorshipType: z.string().trim().optional(),
-  budget: z.string().trim().optional(),
 });
 
 export const contactSubmissionResponseSchema = z.object({

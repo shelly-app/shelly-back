@@ -16,8 +16,6 @@ export const contactSubmissions = pgTable("contact_submissions", {
   shelterName: varchar("shelter_name", { length: 255 }),
   shelterLocation: varchar("shelter_location", { length: 255 }),
   shelterType: varchar("shelter_type", { length: 255 }),
-  sponsorshipType: varchar("sponsorship_type", { length: 255 }),
-  budget: varchar("budget", { length: 255 }),
   ...timestamps,
 });
 
