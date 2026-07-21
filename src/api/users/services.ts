@@ -81,6 +81,11 @@ export async function canEditUser(
   return false;
 }
 
+export async function isShelterAdmin(userId: number, shelterId: number) {
+  const membership = await repository.findShelterMember(userId, shelterId);
+  return membership?.role.name === "admin";
+}
+
 export async function updateUserShelterRole(
   userId: number,
   shelterId: number,

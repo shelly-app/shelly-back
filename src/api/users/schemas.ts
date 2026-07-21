@@ -26,7 +26,7 @@ export const updateUserBodySchema = z.object({
     .array(
       z.object({
         shelterId: z.number().int().positive(),
-        role: z.string().trim().min(1),
+        role: z.enum(["admin", "volunteer"]),
       }),
     )
     .optional(),

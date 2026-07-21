@@ -188,6 +188,24 @@ describe("users/services", () => {
     });
   });
 
+  describe("isShelterAdmin", () => {
+    it("should return true for an admin membership", async () => {
+      vi.mocked(repository.findShelterMember).mockResolvedValue({
+        role: { name: "admin" },
+      } as unknown as Awaited<ReturnType<typeof repository.findShelterMember>>);
+
+      await expect(services.isShelterAdmin(1, 1)).resolves.toBe(true);
+    });
+
+    it("should return false for a non-admin membership", async () => {
+      vi.mocked(repository.findShelterMember).mockResolvedValue({
+        role: { name: "volunteer" },
+      } as unknown as Awaited<ReturnType<typeof repository.findShelterMember>>);
+
+      await expect(services.isShelterAdmin(1, 1)).resolves.toBe(false);
+    });
+  });
+
   describe("updateUserShelterRole", () => {
     it("should update user role successfully", async () => {
       const mockRole = { id: 1, name: "admin" } as unknown as Awaited<

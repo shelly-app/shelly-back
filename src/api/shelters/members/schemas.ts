@@ -6,7 +6,7 @@ export const memberParamsSchema = z.object({
 
 export const registerMemberBodySchema = z.object({
   email: z.email(),
-  role: z.string().trim().min(1),
+  role: z.enum(["admin", "volunteer"]),
 });
 
 export const memberResponseSchema = z.array(

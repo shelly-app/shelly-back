@@ -9,6 +9,7 @@ import {
   findUserById,
   findUserWithSharedShelters,
   getAuthenticatedUser,
+  isShelterAdmin,
   updateUserAvatar,
   updateUserName,
   updateUserShelterRole,
@@ -80,6 +81,12 @@ export async function updateUser(req: Request, res: Response) {
 
   if (body.shelterRoles) {
     for (const shelterRole of body.shelterRoles) {
+      if (isSelf) {
+        return res.status(StatusCodes.FORBIDDEN).json({
+          error: "Forbidden: You cannot change your own shelter role",
+        });
+      }
+
       const allowed = await hasPermission(
         currentUser.id,
         shelterRole.shelterId,
@@ -89,6 +96,12 @@ export async function updateUser(req: Request, res: Response) {
       if (!allowed) {
         return res.status(StatusCodes.FORBIDDEN).json({
           error: `Forbidden: Cannot manage members at shelter ${shelterRole.shelterId}`,
+        });
+      }
+
+      if (!(await isShelterAdmin(currentUser.id, shelterRole.shelterId))) {
+        return res.status(StatusCodes.FORBIDDEN).json({
+          error: `Forbidden: Only shelter admins can manage roles at shelter ${shelterRole.shelterId}`,
         });
       }
 

@@ -51,6 +51,7 @@ export async function findShelterMember(userId: number, shelterId: number) {
       eq(shelterMembers.userId, userId),
       eq(shelterMembers.shelterId, shelterId),
     ),
+    with: { role: true },
   });
 }
 
