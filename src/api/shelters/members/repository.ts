@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { roles, shelterMembers, users } from "@/db/schema";
+import { roles, shelter, shelterMembers, users } from "@/db/schema";
 
 export async function findByShelterId(shelterId: number) {
   return db.query.shelterMembers.findMany({
@@ -15,6 +15,12 @@ export async function findByShelterId(shelterId: number) {
 export async function findRoleByName(roleName: string) {
   return db.query.roles.findFirst({
     where: eq(roles.name, roleName),
+  });
+}
+
+export async function findShelterById(shelterId: number) {
+  return db.query.shelter.findFirst({
+    where: eq(shelter.id, shelterId),
   });
 }
 
@@ -39,6 +45,17 @@ export async function createMembership(values: {
   roleId: number;
 }) {
   await db.insert(shelterMembers).values(values);
+}
+
+export async function deleteMembership(userId: number, shelterId: number) {
+  await db
+    .delete(shelterMembers)
+    .where(
+      and(
+        eq(shelterMembers.userId, userId),
+        eq(shelterMembers.shelterId, shelterId),
+      ),
+    );
 }
 
 export async function findMembership(userId: number, shelterId: number) {

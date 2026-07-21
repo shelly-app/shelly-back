@@ -5,10 +5,12 @@ import { requirePermission } from "@/api/middleware/require-permission";
 import {
   handleGetMembers,
   handleRegisterMember,
+  handleRemoveMember,
 } from "@/api/shelters/members/handlers";
 import {
   memberParamsSchema,
   memberResponseSchema,
+  memberUserParamsSchema,
   registerMemberBodySchema,
   registerMemberResponseSchema,
 } from "@/api/shelters/members/schemas";
@@ -25,6 +27,12 @@ shelterMembersRouter.post(
   "/",
   requirePermission(Permissions.MEMBERS_WRITE),
   handleRegisterMember,
+);
+
+shelterMembersRouter.delete(
+  "/:userId",
+  requirePermission(Permissions.MEMBERS_WRITE),
+  handleRemoveMember,
 );
 
 export const shelterMembersPaths: ZodOpenApiPathsObject = {
@@ -69,6 +77,24 @@ export const shelterMembersPaths: ZodOpenApiPathsObject = {
         },
         [StatusCodes.NOT_FOUND]: {
           description: "Shelter not found",
+        },
+      },
+    },
+  },
+  "/shelters/{shelterId}/members/{userId}": {
+    delete: {
+      requestParams: {
+        path: memberUserParamsSchema,
+      },
+      responses: {
+        [StatusCodes.OK]: {
+          description: "Member removed",
+        },
+        [StatusCodes.FORBIDDEN]: {
+          description: "Only shelter admins can remove other members",
+        },
+        [StatusCodes.NOT_FOUND]: {
+          description: "Member not found",
         },
       },
     },

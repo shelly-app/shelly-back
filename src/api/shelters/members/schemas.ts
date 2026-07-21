@@ -4,6 +4,10 @@ export const memberParamsSchema = z.object({
   shelterId: z.coerce.number().int().positive(),
 });
 
+export const memberUserParamsSchema = memberParamsSchema.extend({
+  userId: z.coerce.number().int().positive(),
+});
+
 export const registerMemberBodySchema = z.object({
   email: z.email(),
   role: z.enum(["admin", "volunteer"]),
@@ -16,6 +20,7 @@ export const memberResponseSchema = z.array(
     email: z.email(),
     avatarUrl: z.string().nullable(),
     role: z.string(),
+    pending: z.boolean(),
     joinedAt: z.date(),
   }),
 );

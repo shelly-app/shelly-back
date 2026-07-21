@@ -22,9 +22,9 @@ pnpm db:seed
 pnpm dev
 ```
 
-## Contact-form email
+## Email delivery
 
-Contact submissions are stored in Postgres and emailed through standard SMTP.
+Contact submissions and member invitations are emailed through standard SMTP.
 This does not require AWS SES. For a free Gmail setup:
 
 1. Enable two-step verification on the sender account.
@@ -33,5 +33,6 @@ This does not require AWS SES. For a free Gmail setup:
    `SMTP_SECURE=false`.
 4. Set `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL`, and
    `CONTACT_RECIPIENT_EMAIL` in `.env`.
+5. Set `APP_PUBLIC_URL` to the frontend origin used in invitation links.
 
 Any SMTP provider can be used with the same variables.

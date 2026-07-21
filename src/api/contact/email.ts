@@ -1,46 +1,10 @@
-import nodemailer, { type Transporter } from "nodemailer";
 import type { ContactSubmission } from "@/db/schema";
+import { contactRecipientEmail } from "@/env";
 import {
-  contactRecipientEmail,
-  smtpFromEmail,
-  smtpHost,
-  smtpPassword,
-  smtpPort,
-  smtpSecure,
-  smtpUser,
-} from "@/env";
-
-let transporter: Transporter | undefined;
-
-function getTransporter() {
-  if (!smtpHost || !smtpUser || !smtpPassword) {
-    throw new Error(
-      "Contact email is not configured. Set SMTP_HOST, SMTP_USER, and SMTP_PASSWORD.",
-    );
-  }
-
-  transporter ??= nodemailer.createTransport({
-    host: smtpHost,
-    port: smtpPort,
-    secure: smtpSecure,
-    auth: {
-      user: smtpUser,
-      pass: smtpPassword,
-    },
-  });
-
-  return transporter;
-}
-
-const escapeHtml = (value: string) =>
-  value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
-const singleLine = (value: string) => value.replace(/[\r\n]+/g, " ").trim();
+  escapeEmailHtml,
+  sendEmail,
+  toEmailSubjectLine,
+} from "@/infrastructure/email";
 
 export async function sendContactSubmissionEmail(
   submission: ContactSubmission,
@@ -79,17 +43,17 @@ export async function sendContactSubmissionEmail(
     .map(([label, value]) => `${label}:\n${value}`)
     .join("\n\n");
   const html = `
-    <h2>${escapeHtml(typeLabel)}</h2>
+    <h2>${escapeEmailHtml(typeLabel)}</h2>
     <table style="border-collapse:collapse;width:100%;max-width:680px">
       ${populatedFields
         .map(
           ([label, value]) => `
             <tr>
               <th style="padding:8px;text-align:left;vertical-align:top;border-bottom:1px solid #ddd">
-                ${escapeHtml(label)}
+                ${escapeEmailHtml(label)}
               </th>
               <td style="padding:8px;border-bottom:1px solid #ddd">
-                ${escapeHtml(value).replaceAll("\n", "<br>")}
+                ${escapeEmailHtml(value).replaceAll("\n", "<br>")}
               </td>
             </tr>
           `,
@@ -98,11 +62,10 @@ export async function sendContactSubmissionEmail(
     </table>
   `;
 
-  await getTransporter().sendMail({
-    from: smtpFromEmail ?? smtpUser,
+  await sendEmail({
     to: contactRecipientEmail,
     replyTo: submission.email,
-    subject: `[Shelly] ${typeLabel}: ${singleLine(subjectName)}`,
+    subject: `[Shelly] ${typeLabel}: ${toEmailSubjectLine(subjectName)}`,
     text,
     html,
   });

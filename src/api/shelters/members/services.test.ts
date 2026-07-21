@@ -1,14 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ZodError } from "zod";
+import { sendMemberInvitationEmail } from "@/api/shelters/members/email";
 import * as repository from "@/api/shelters/members/repository";
 import * as services from "@/api/shelters/members/services";
+
+vi.mock("@/api/shelters/members/email", () => ({
+  sendMemberInvitationEmail: vi.fn().mockResolvedValue(undefined),
+}));
 
 vi.mock("@/api/shelters/members/repository", () => ({
   findByShelterId: vi.fn().mockResolvedValue([]),
   findRoleByName: vi.fn().mockResolvedValue(null),
+  findShelterById: vi.fn().mockResolvedValue({ id: 1, name: "Happy Paws" }),
   findUserByEmail: vi.fn().mockResolvedValue(null),
   create: vi.fn().mockResolvedValue(null),
   createMembership: vi.fn().mockResolvedValue(undefined),
+  deleteMembership: vi.fn().mockResolvedValue(undefined),
   findMembership: vi.fn().mockResolvedValue(null),
 }));
 
@@ -22,13 +29,21 @@ describe("shelters/members/services", () => {
       const mockMembers = [
         {
           userId: 1,
-          user: { name: "John Doe", email: "john@example.com" },
+          user: {
+            name: "John Doe",
+            email: "john@example.com",
+            cognitoSub: "cognito-user-1",
+          },
           role: { name: "admin" },
           joinedAt: new Date("2023-01-01"),
         },
         {
           userId: 2,
-          user: { name: "Jane Smith", email: "jane@example.com" },
+          user: {
+            name: "Jane Smith",
+            email: "jane@example.com",
+            cognitoSub: "pending:jane@example.com",
+          },
           role: { name: "member" },
           joinedAt: new Date("2023-02-01"),
         },
@@ -45,6 +60,7 @@ describe("shelters/members/services", () => {
           email: "john@example.com",
           avatarUrl: null,
           role: "admin",
+          pending: false,
           joinedAt: new Date("2023-01-01"),
         },
         {
@@ -53,6 +69,7 @@ describe("shelters/members/services", () => {
           email: "jane@example.com",
           avatarUrl: null,
           role: "member",
+          pending: true,
           joinedAt: new Date("2023-02-01"),
         },
       ]);
@@ -97,6 +114,11 @@ describe("shelters/members/services", () => {
           role: "admin",
           shelterId: 1,
         },
+      });
+      expect(sendMemberInvitationEmail).toHaveBeenCalledWith({
+        email: "john@example.com",
+        shelterName: "Happy Paws",
+        role: "admin",
       });
     });
 
@@ -188,6 +210,54 @@ describe("shelters/members/services", () => {
         error: "Failed to create user",
         status: 500,
       });
+    });
+
+    it("should roll back membership when invitation delivery fails", async () => {
+      const mockRole = { id: 1, name: "volunteer" } as unknown as Awaited<
+        ReturnType<typeof repository.findRoleByName>
+      >;
+      const mockUser = {
+        id: 1,
+        name: "John Doe",
+        email: "john@example.com",
+      } as unknown as Awaited<ReturnType<typeof repository.findUserByEmail>>;
+
+      vi.mocked(repository.findRoleByName).mockResolvedValue(mockRole);
+      vi.mocked(repository.findUserByEmail).mockResolvedValue(mockUser);
+      vi.mocked(repository.findMembership).mockResolvedValue(undefined);
+      vi.mocked(sendMemberInvitationEmail).mockRejectedValue(
+        new Error("SMTP unavailable"),
+      );
+
+      await expect(
+        services.registerMember(1, "john@example.com", "volunteer"),
+      ).rejects.toThrow("SMTP unavailable");
+
+      expect(repository.deleteMembership).toHaveBeenCalledWith(1, 1);
+    });
+  });
+
+  describe("removeMember", () => {
+    it("should remove an existing member without sending email", async () => {
+      vi.mocked(repository.findMembership).mockResolvedValue({
+        userId: 2,
+        shelterId: 1,
+      } as unknown as Awaited<ReturnType<typeof repository.findMembership>>);
+
+      const result = await services.removeMember(1, 2);
+
+      expect(repository.deleteMembership).toHaveBeenCalledWith(2, 1);
+      expect(sendMemberInvitationEmail).not.toHaveBeenCalled();
+      expect(result).toEqual({ data: true });
+    });
+
+    it("should return not found for a non-member", async () => {
+      vi.mocked(repository.findMembership).mockResolvedValue(undefined);
+
+      const result = await services.removeMember(1, 999);
+
+      expect(repository.deleteMembership).not.toHaveBeenCalled();
+      expect(result).toEqual({ error: "Member not found", status: 404 });
     });
   });
 });

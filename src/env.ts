@@ -12,6 +12,12 @@ const optionalEmail = z.preprocess(
   z.email().optional(),
 );
 
+const optionalUrl = z.preprocess(
+  (value) =>
+    typeof value === "string" && value.trim() === "" ? undefined : value,
+  z.url().optional(),
+);
+
 const envSchema = z.object({
   NODE_ENV: z.string("production"),
   DEBUG: z.stringbool().default(false),
@@ -61,6 +67,7 @@ const envSchema = z.object({
   SMTP_PASSWORD: optionalString,
   SMTP_FROM_EMAIL: optionalEmail,
   CONTACT_RECIPIENT_EMAIL: optionalEmail,
+  APP_PUBLIC_URL: optionalUrl.transform((value) => value?.replace(/\/+$/, "")),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -93,4 +100,5 @@ export const {
   SMTP_PASSWORD: smtpPassword,
   SMTP_FROM_EMAIL: smtpFromEmail,
   CONTACT_RECIPIENT_EMAIL: contactRecipientEmail,
+  APP_PUBLIC_URL: appPublicUrl,
 } = env;

@@ -1,4 +1,5 @@
 import { ZodError } from "zod";
+import { sendMemberInvitationEmail } from "@/api/shelters/members/email";
 import * as repository from "@/api/shelters/members/repository";
 import { buildPublicUrl } from "@/api/storage/s3";
 
@@ -11,6 +12,7 @@ export async function findShelterMembers(shelterId: number) {
     email: m.user.email,
     avatarUrl: buildPublicUrl(m.user.avatarKey),
     role: m.role.name,
+    pending: m.user.cognitoSub.startsWith("pending:"),
     joinedAt: m.joinedAt,
   }));
 }
@@ -20,7 +22,10 @@ export async function registerMember(
   email: string,
   roleName: string,
 ) {
-  const role = await repository.findRoleByName(roleName);
+  const [role, shelter] = await Promise.all([
+    repository.findRoleByName(roleName),
+    repository.findShelterById(shelterId),
+  ]);
 
   if (!role) {
     throw new ZodError([
@@ -30,6 +35,10 @@ export async function registerMember(
         message: `Invalid role: ${roleName}`,
       },
     ]);
+  }
+
+  if (!shelter) {
+    return { error: "Shelter not found" as const, status: 404 as const };
   }
 
   let user = await repository.findUserByEmail(email);
@@ -64,6 +73,17 @@ export async function registerMember(
     roleId: role.id,
   });
 
+  try {
+    await sendMemberInvitationEmail({
+      email: user.email,
+      shelterName: shelter.name,
+      role: role.name,
+    });
+  } catch (error) {
+    await repository.deleteMembership(user.id, shelterId);
+    throw error;
+  }
+
   return {
     data: {
       userId: user.id,
@@ -73,4 +93,19 @@ export async function registerMember(
       shelterId,
     },
   };
+}
+
+export async function removeMember(
+  shelterId: number,
+  userId: number,
+): Promise<{ data: true } | { error: "Member not found"; status: 404 }> {
+  const membership = await repository.findMembership(userId, shelterId);
+
+  if (!membership) {
+    return { error: "Member not found" as const, status: 404 as const };
+  }
+
+  await repository.deleteMembership(userId, shelterId);
+
+  return { data: true as const };
 }
